@@ -7,7 +7,7 @@
 
 defined('_INIT') or die;
 
-class Field {
+class Field extends FormElement {
 
     public $id           = null;
     public $name         = null;
@@ -335,9 +335,9 @@ class Field {
         $val = $this->getValue();
         if($this->required && empty($val)){
             if(isset($this->message) && strlen($this->message)) {
-                $this->error = $this->message;
+                $this->error = __($this->message);
             } else {
-                $this->error = "Field ". $this->name .": value required";
+                $this->error = __("Field {1}: value required", $this->name);
             }
             return false;
         }
@@ -346,9 +346,9 @@ class Field {
         if($this->type){
             if(!$this->type->validate()){
                 if(isset($this->message) && strlen($this->message)) {
-                    $this->error = $this->message;
+                    $this->error = __($this->message);
                 } else {
-                    $this->error = "Invalid field value";
+                    $this->error = __("Invalid field value");
                 }
                 return false;
             }
@@ -380,9 +380,9 @@ class Field {
 
             if(!$fieldValidate->test($this->getValue(), $this, $validate)){
                 if(isset($validate->message) && strlen($validate->message)) {
-                    $this->error = $validate->message;
+                    $this->error = __($validate->message);
                 } else {
-                    $this->error = "Field not valid";
+                    $this->error = __("Field not valid");
                 }
                 return false;
             }

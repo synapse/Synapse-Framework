@@ -1,0 +1,39 @@
+{
+    "attributes": {
+        "name": "Edit",
+        "action": "test",
+        "enctype": "blabla",
+        "style": "border: 1px solid red; background: orange"
+    },
+    "fieldsets": [{
+        "label": "Some nice info",
+        "attributes": {
+            "class": "fieldset",
+            "style": "margin: 20px; border: 2px solid green;"
+        },
+        "fields": [{
+                    "name": "username",
+                    "label": "Username",
+                    "type": "text",
+                    "required": true,
+                    "message": "INVALID_USERNAME",
+                    "filter": "string",
+                    "attributes": {
+                        "class": "form-control"
+                    },
+                    "validate": [
+                        {
+                            "type": "email",
+                            "message": "The entered username must be an email"
+                        },
+                        {
+                            "type": "unique",
+                            "message": "The entered username is already present in the database",
+                            "table": "#__users",
+                            "column": "username",
+                            "self": "id"
+                        }
+                    ]
+                }]
+    }]
+}
