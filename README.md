@@ -26,8 +26,7 @@ Please see the [LICENSE](https://github.com/synapse/Synapse-MVC/blob/master/LICE
 ## Contribute
 If you want to contribute or report bugs please use the [issue tracker](https://github.com/synapse/Synapse-MVC/issues) or drop me a line at: 
 
-<div align="center">
+
 ```php
 <?= base64_decode('Y3Jpc3RpYW4uYmFybHV0aXVAZ21haWwuY29t'); ?>
 ```
-</div>
