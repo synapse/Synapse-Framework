@@ -58,6 +58,8 @@ class FormElement {
      */
     public function getAttribute($name)
     {
+        if(!property_exists($this, $name)) return null;
+
         return $this->attributes->$name;
     }
 

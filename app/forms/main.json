@@ -12,14 +12,19 @@
             "style": "margin: 20px; border: 2px solid green;"
         },
         "fields": [{
+                    "name": "myfield",
                     "label": "Username",
                     "type": "text",
                     "message": "INVALID_USERNAME",
                     "filter": "string",
+                    "default": "Hello Word",
                     "attributes": {
-                        "name": "username",
                         "class": "form-control",
                         "required": true
+                    },
+                    "options":{
+                        "max": 10,
+                        "labelclass": "some-nice-class-here"
                     },
                     "validate": [
                         {

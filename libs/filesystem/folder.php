@@ -1,24 +1,8 @@
 <?php
-/**
- * @package     Joomla.Platform
- * @subpackage  FileSystem
- *
- * @copyright   Copyright (C) 2005 - 2012 Open Source Matters, Inc. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE
- */
 
-defined('JPATH_PLATFORM') or die;
+defined('_INIT') or die;
 
-jimport('joomla.filesystem.path');
-
-/**
- * A Folder handling class
- *
- * @package     Joomla.Platform
- * @subpackage  FileSystem
- * @since       11.1
- */
-abstract class JFolder
+abstract class Folder
 {
 	/**
 	 * Copy a folder.

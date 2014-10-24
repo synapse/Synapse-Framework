@@ -67,7 +67,7 @@ class Fieldset extends FormElement {
             $field->setForm($this->getForm());
         }
 
-        $this->fields[$field->name] = $field;
+        $this->fields[$field->getName()] = $field;
         return $this;
     }
 
@@ -207,6 +207,11 @@ class Fieldset extends FormElement {
         if($this->attributes){
             $attributes = array();
             foreach($this->attributes as $attribute=>$value){
+
+                if(is_bool($value)){
+                    $value = $value ? 'true' : 'false';
+                }
+
                 $attributes[] = $attribute.'="'.$value.'"';
             }
 

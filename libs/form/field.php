@@ -9,18 +9,34 @@ defined('_INIT') or die;
 
 class Field extends FormElement {
 
+    protected $name         = null;
     protected $label        = null;
     protected $type         = null;
     protected $filter       = null;
+    protected $value        = null;
+    protected $default      = null;
     protected $validations  = array();
+    protected $options      = array();
+    protected $fieldsPaths  = array();
 
     public function __construct($options = array())
     {
-        $this->attributes = new stdClass();
+        $this->attributes   = new stdClass();
+        $this->options      = new stdClass();
+        $this->fieldsPaths  = array(APP.'/forms/fields/', LIBRARY.'/form/fields/');
 
         if(array_key_exists('attributes', $options) && (is_array($options['attributes']) || is_object($options['attributes']))){
             $attributes = (object)$options['attributes'];
             $this->setAttributes($attributes);
+        }
+
+        if(array_key_exists('options', $options) && (is_array($options['options']) || is_object($options['options']))){
+            $options['options'] = (object)$options['options'];
+            $this->setOptions($options['options']);
+        }
+
+        if(array_key_exists('name', $options) && is_string($options['name'])){
+            $this->setName($options['name']);
         }
 
         if(array_key_exists('label', $options) && is_string($options['label'])){
@@ -43,9 +59,26 @@ class Field extends FormElement {
             $this->setValidations($options['validate']);
         }
 
+
         return $this;
     }
 
+
+    public function setName($name)
+    {
+        if(!is_string($name)){
+            throw new Error('setName expects a string, '.gettype($name).' given');
+        }
+
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
 
     public function setLabel($label)
     {
@@ -58,6 +91,31 @@ class Field extends FormElement {
         return $this;
     }
 
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    public function setDefault($default)
+    {
+        $this->default = $default;
+    }
+
+    public function getDefault()
+    {
+        return $this->default;
+    }
+
     public function setType($type)
     {
         if(!is_string($type)){
@@ -67,6 +125,11 @@ class Field extends FormElement {
         $this->type = $type;
 
         return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
     }
 
     public function setFilter($filter)
@@ -122,9 +185,74 @@ class Field extends FormElement {
     }
 
 
+    public function setOptions($options)
+    {
+        if(!is_array($options) && !is_object($options)){
+            throw new Error('setOptions expects an object or an array, '.gettype($options).' given');
+        }
+
+        $this->options = (object)$options;
+        return $this;
+    }
+
+
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    public function setOption($name, $value)
+    {
+        $this->options->$name = $value;
+        return $this;
+    }
+
+    public function getOption($name)
+    {
+        return $this->options->$name;
+    }
+
+    public function addIncludePath($path)
+    {
+        if(!Folder::exists($path)){
+            throw new Error('Include path not found');
+        }
+
+        array_unshift($this->fieldsPaths, $path);
+
+        return $this;
+    }
+
     public function render()
     {
+        if(!$this->getType()){
+            throw new Error('Missing field type');
+        }
 
+        foreach($this->fieldsPaths as $path){
+            $path = Path::clean($path.$this->getType().'.php');
+            if(File::exists($path)){
+                require_once($path);
+
+                $typeClass  = ucfirst($this->getType()).'FieldType';
+
+                if(!class_exists($typeClass)){
+                    throw new Error( __('Field type class not found!').' '.$typeClass );
+                }
+
+                $type = new $typeClass($this);
+
+                if(!method_exists($type, 'render')){
+                    throw new Error( __('Field type class method "render()" not found in class "{2}"', $type), null );
+                }
+
+                $this->setTemplate($type->render());
+
+                break;
+            }
+        }
+
+        return $this->getTemplate();
     }
 }
 
