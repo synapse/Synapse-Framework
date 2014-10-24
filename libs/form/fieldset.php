@@ -44,7 +44,9 @@ class Fieldset extends FormElement {
     public function loadFields($fields = array())
     {
         foreach($fields as $field){
-            $this->addField(new Field($field));
+            $newField = new Field((array)$field);
+
+            $this->addField($newField);
         }
         return $this;
     }

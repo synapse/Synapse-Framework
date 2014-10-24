@@ -12,14 +12,14 @@
             "style": "margin: 20px; border: 2px solid green;"
         },
         "fields": [{
-                    "name": "username",
                     "label": "Username",
                     "type": "text",
-                    "required": true,
                     "message": "INVALID_USERNAME",
                     "filter": "string",
                     "attributes": {
-                        "class": "form-control"
+                        "name": "username",
+                        "class": "form-control",
+                        "required": true
                     },
                     "validate": [
                         {
@@ -37,3 +37,21 @@
                 }]
     }]
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
