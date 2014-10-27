@@ -7,36 +7,47 @@
 
 defined('_INIT') or die;
 
-class FieldTypeList extends FieldType
+class ListFieldType extends FieldType
 {
 
-    public $template = array(
-        "<div>",
-        "   <label class='{{labelclass}}'>{{label}}</label>",
-        "   <select {{id}} {{name}} {{attributes}} {{required}}>",
-        "{{repeat}}",
-        "   <option value='{{value}}' {{selected}}>{{text}}</option>",
-		"{{/repeat}}",
-        "   </select>",
-        "</div>"
-    );
+    public $template = "<div>
+                            <label class='{{labelclass}}'>{{label}}</label>
+                            <select {{name}} {{attributes}}>
+                            {{repeat}}
+                            <option value='{{value}}' {{selected}}>{{text}}</option>
+		                    {{/repeat}}
+                            </select>
+                        </div>";
 
     public function render()
     {
-        $this->replace('name', isset($this->field->name) ? 'name="'.$this->field->name.'"' : '')
-            ->replace('id', isset($this->field->id) ?  'id="'.$this->field->id.'"' : '')
-            ->replace('labelclass', $this->field->labelclass)
-            ->replace('label', $this->field->label)
-            ->replace('required', $this->field->required ? 'required=""' : '')
-            ->setAttributes('attributes', $this->field->getAttributes());
+
+        $this->replace('name', $this->field->getName())
+            ->replace('labelclass', $this->field->getOption('labelclass'))
+            ->replace('label', $this->field->getLabel())
+            ->setAttributes('attributes', $this->field->getAttributes())
+            ->setValue('value', $this->field->getValue(), $this->field->getDefault());
 
 
-        if(isset($this->field->options) && count($this->field->options->items)){
-            foreach($this->field->options->items as &$item){
-                $item->selected = ($item->value == $this->field->getValue()) ? 'selected=""' : '';
+        $items = $this->field->getOption('items');
+        if(isset($items) && count($items)){
+
+            $selected = false;
+
+            foreach($items as &$item){
+                if($item->value == $this->field->getValue()){
+                    $item->selected = 'selected';
+                    $selected = true;
+                } else if ($item->value == $this->field->getDefault() && !$selected){
+                    $item->selected = 'selected';
+                } else {
+                    $item->selected = '';
+                }
             }
-            $this->repeat('repeat', $this->field->options->items);
+
+            $this->repeat('repeat', $items);
         }
+
 
         return $this->getTemplate();
     }

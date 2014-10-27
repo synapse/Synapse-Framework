@@ -59,6 +59,13 @@ class Field extends FormElement {
             $this->setValidations($options['validate']);
         }
 
+        if(array_key_exists('default', $options)){
+            $this->setDefault($options['default']);
+        }
+
+        if(array_key_exists('value', $options)){
+            $this->setValue($options['value']);
+        }
 
         return $this;
     }
@@ -227,6 +234,10 @@ class Field extends FormElement {
     {
         if(!$this->getType()){
             throw new Error('Missing field type');
+        }
+
+        if(!$this->getName()){
+            throw new Error('Missing field name');
         }
 
         foreach($this->fieldsPaths as $path){
