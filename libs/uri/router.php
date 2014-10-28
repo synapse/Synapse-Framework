@@ -224,6 +224,10 @@ class Router {
         $controllerClass  = ucfirst(array_pop($controller)).'Controller';
         $controllerMethod = $this->current->getAction();
 
+        if(!class_exists($controllerClass)){
+            throw new Error( __('Controller class not found!').' '.$controllerClass );
+        }
+
         $controller = new $controllerClass($this, $this->current->getParams(), $request->getParams());
 
         if(!method_exists($controller, $controllerMethod)){
@@ -247,6 +251,10 @@ class Router {
 
         $middlewareClass  = ucfirst(array_pop($middleware)).'Middleware';
         $middlewareMethod = $this->current->getMiddlewareAction();
+
+        if(!class_exists($middlewareClass)){
+            throw new Error( __('Middleware class not found!').' '.$middlewareClass );
+        }
 
         $middleware = new $middlewareClass($this, $this->current->getParams(), $request->getParams());
 

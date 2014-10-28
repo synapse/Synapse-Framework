@@ -7,15 +7,12 @@
 
 defined('_INIT') or die;
 
-class Fieldset {
+class Fieldset extends FormElement {
 
-    public $name        = null;
-    public $label       = null;
-    protected $fields   = array();
-    public $attributes  = array();
-    protected $errors   = array();
-    protected $form     = null;
-    public $template    = array("<fieldset {{name}} {{attributes}}>", "<legend>{{label}}</legend>", "{{fields}}", "</fieldset>");
+    protected $label        = null;
+    protected $fields       = array();
+    protected $form         = null;
+    protected $template     = "<fieldset {{attributes}}><legend>{{label}}</legend>{{fields}}</fieldset>";
 
     /**
      * Initializes the fieldset with a name, label and fields list
@@ -23,24 +20,21 @@ class Fieldset {
      * @param String $label
      * @param Array $fields
      */
-    public function __construct($name, $label = null, $fields = array(), $attributes = array())
+    public function __construct($options = array())
     {
-        if($name) {
-            $this->name = $name;
-        } else {
-            throw new Error('Fieldset must have a name');
+        $this->attributes = new stdClass();
+
+        if(array_key_exists('attributes', $options) && (is_array($options['attributes']) || is_object($options['attributes']))){
+            $attributes = (object)$options['attributes'];
+            $this->setAttributes($attributes);
         }
 
-        if($label) {
-            $this->label = $label;
+        if(array_key_exists('label', $options) && is_string($options['label'])){
+            $this->setLabel($options['label']);
         }
 
-        if(count($fields)){
-            $this->loadFields($fields);
-        }
-
-        if(is_object($attributes) || is_array($attributes)){
-            $this->setAttributes((object)$attributes);
+        if(array_key_exists('fields', $options) && is_array($options['fields']) && count($options['fields'])){
+            $this->loadFields($options['fields']);
         }
     }
 
@@ -50,7 +44,9 @@ class Fieldset {
     public function loadFields($fields = array())
     {
         foreach($fields as $field){
-            $this->addField(new Field($field));
+            $newField = new Field((array)$field);
+
+            $this->addField($newField);
         }
         return $this;
     }
@@ -71,75 +67,10 @@ class Fieldset {
             $field->setForm($this->getForm());
         }
 
-        $this->fields[$field->name] = $field;
+        $this->fields[$field->getName()] = $field;
         return $this;
     }
 
-    /**
-     * Sets the attributes of the fieldset
-     * @param Array|Object $attributes
-     * @return $this
-     * @throws Error
-     */
-    public function setAttributes($attributes)
-    {
-        if(!is_array($attributes) && !is_object($attributes)){
-            throw new Error('setAttributes expects an object or an array, '.gettype($attributes).' given');
-        }
-
-        $this->attributes = (object)$attributes;
-        return $this;
-    }
-
-    /**
-     * Returns the fieldset attributes
-     * @return Object
-     */
-    public function getAttributes()
-    {
-        return $this->attributes;
-    }
-
-    /**
-     * Sets the html template splitted in an array
-     * @param Array $template
-     */
-    public function setTemplate($template)
-    {
-        if(!is_array($template) && !is_string($template)){
-            throw new Error('setTemplate expects an array or string, '.gettype($template).' given');
-        }
-
-        $this->template = $template;
-        return $this;
-    }
-
-    /**
-     * Loads a fieldset template from a file
-     * @param String $path
-     */
-    public function loadTemplate($path)
-    {
-        if(!FS::exists($path)){
-            throw new Error('Fieldset template file not found at the given path: '.$path);
-        }
-
-        $template = array(file_get_contents($path));
-        $this->setTemplate($template);
-    }
-
-    /**
-     * Return the html template
-     * @return string
-     */
-    public function getTemplate()
-    {
-        if(is_array($this->template)) {
-            return implode("\r\n", $this->template);
-        }
-
-        return $this->template;
-    }
 
     /**
      * Return an array of Field type objects
@@ -148,6 +79,29 @@ class Fieldset {
     public function getFields()
     {
         return $this->fields;
+    }
+
+
+    /**
+     * Sets the fieldset label
+     * @param String $text
+     * @return $this
+     */
+    public function setLabel($text)
+    {
+        $this->label = $text;
+
+        return $this;
+    }
+
+
+    /**
+     * Return the fieldset label
+     * @return String
+     */
+    public function getLabel()
+    {
+        return $this->label;
     }
 
     /**
@@ -250,17 +204,15 @@ class Fieldset {
     {
         $template = $this->getTemplate();
 
-        if($this->name) {
-            $template = str_replace("{{name}}", 'name="' . $this->name . '"', $template);
-        } else {
-            $template = str_replace("{{name}}", '', $template);
-        }
-
-        if(count($this->getAttributes())){
+        if($this->attributes){
             $attributes = array();
+            foreach($this->attributes as $attribute=>$value){
 
-            foreach($this->getAttributes() as $attrName => $attrValue){
-                $attributes[] = $attrName.'="'.$attrValue.'"';
+                if(is_bool($value)){
+                    $value = $value ? 'true' : 'false';
+                }
+
+                $attributes[] = $attribute.'="'.$value.'"';
             }
 
             $template = str_replace("{{attributes}}", implode(" ", $attributes), $template);
@@ -268,20 +220,19 @@ class Fieldset {
             $template = str_replace("{{attributes}}", '', $template);
         }
 
+
         if($this->label) {
             $template = str_replace("{{label}}", $this->label, $template);
         } else {
             $template = str_replace("{{label}}", '', $template);
         }
 
-        if(count($this->fields)){
+
+        if(count($this->getFields())){
             $fields = array();
 
             foreach($this->getFields() as $field){
-                ob_start();
-                $field->render();
-                $fields[] = ob_get_contents();
-                ob_end_clean();
+                $fields[] = $field->render();
             }
 
             $template = str_replace("{{fields}}", implode("", $fields), $template);
@@ -289,6 +240,6 @@ class Fieldset {
             $template = str_replace("{{fields}}", '', $template);
         }
 
-        echo $template;
+        return $template;
     }
 }

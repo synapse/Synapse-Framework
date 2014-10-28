@@ -9,7 +9,7 @@ defined('_INIT') or die;
 
 class FieldType {
 
-    protected $template = array();
+    protected $template = '';
     protected $field = null;
 
     public function __construct($field)
@@ -19,17 +19,13 @@ class FieldType {
 
     public function getTemplate()
     {
-        if(is_array($this->template)) {
-            return implode("\r\n", $this->template);
-        }
-
         return $this->template;
     }
 
     public function setTemplate($template)
     {
-        if(!is_array($template)){
-            throw new Error('setTemplate expects an array, '.gettype($template).' given');
+        if(!is_string($template)){
+            throw new Error('setTemplate expects a string, '.gettype($template).' given');
         }
 
         $this->template = $template;
@@ -45,7 +41,6 @@ class FieldType {
     {
         $template = $this->getTemplate();
 
-
         if($range){
             $startTag       = "{{".$key."}}";
             $endTag         = "{{/".$key."}}";
@@ -56,7 +51,7 @@ class FieldType {
 
             $template = substr_replace($template, $value ? $value : '', $startTagPos, $tagLength);
         } else {
-            if ($value !== null || $value !== false) {
+            if ($value !== null && $value !== false) {
                 $template = str_replace("{{" . $key . "}}", $value, $template);
             } else {
                 $template = str_replace("{{" . $key . "}}", '', $template);
@@ -70,19 +65,26 @@ class FieldType {
 
     protected function setAttributes($key, $attributes)
     {
-        if(!count($attributes)){
-            $this->replace($key, null);
-            return $this;
+        $template = $this->getTemplate();
+
+        if($attributes){
+            $attrs = array();
+            foreach($attributes as $attribute=>$value){
+
+                if(is_bool($value)){
+                    $value = $value ? 'true' : 'false';
+                }
+
+                $attrs[] = $attribute.'="'.$value.'"';
+            }
+
+            $template = str_replace("{{attributes}}", implode(" ", $attrs), $template);
+        } else {
+            $template = str_replace("{{attributes}}", '', $template);
         }
 
-        $attr = array();
-        foreach($attributes as $name=>$val){
-            $attr[] = $name.'="'.$val.'"';
-        }
 
-        $attributes = implode(" ", $attr);
-
-        $this->replace($key, $attributes);
+        $this->setTemplate($template);
 
         return $this;
     }
