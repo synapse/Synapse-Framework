@@ -9,5 +9,18 @@
 	</head>
 	<body>
 		<h1><?= $hello ?></h1>
+
+        <?php
+
+            $form = new Form(FORMS.'/main.json');
+
+
+            echo '<pre>';
+            print_r( htmlentities( $form->render() ) );
+            echo '</pre>';
+
+        ?>
+
+        <?= $form->render() ?>
 	</body>
 </html>

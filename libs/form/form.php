@@ -7,30 +7,27 @@
 
 defined('_INIT') or die;
 
-class Form {
+class Form extends FormElement {
 
     protected $path         = null;
-    public $name            = null;
-    public $enctype         = "application/x-www-form-urlencoded";
-    public $method          = "POST";
-    public $action          = null;
-    public $attributes      = array();
     protected $fieldsets    = array();
-    protected $errors       = array();
-    public $template        = array("<form {{method}} {{action}} {{enctype}} {{attributes}}>", "{{fieldsets}}", "</form>");
+    protected $data         = array();
+    protected $template     = "<form {{attributes}}>{{fieldsets}}</form>";
 
 
     /**
      * Initialize the Form object with a JSON file
      * @param String $path
      */
-    public function __construct($path)
+    public function __construct($path = null)
     {
+        $this->attributes = new stdClass();
+
         // generate the form from a JSON file
         if($path) {
             $this->path = $path;
 
-            if (!FS::exists($path)) {
+            if (!File::exists($path)) {
                 throw new Error('Form not found at path: ' . $path);
             }
             $this->load();
@@ -49,31 +46,19 @@ class Form {
             throw new Error('The JSON file provided is not valid');
         }
 
-        if(isset($obj->name)){
-            $this->setName($obj->name);
+        if(isset($obj->attributes) && is_object($obj->attributes)){
+             $this->setAttributes($obj->attributes);
         }
 
-        if(isset($obj->action)){
-            $this->setAction($obj->action);
-        }
-
-        if(isset($obj->method)){
-            $this->setMethod($obj->method);
-        }
-
-        if(isset($obj->enctype)){
-            $this->setEnctype($obj->enctype);
-        }
-
-        if(isset($obj->attributes)){
-            $this->setAttributes($obj->attributes);
+        if(isset($obj->template)){
+            $this->setTemplate($obj->template);
         }
 
         if(isset($obj->fieldsets) && is_array($obj->fieldsets) && count($obj->fieldsets)){
             $this->loadFieldsets($obj->fieldsets);
         }
 
-        if(isset($obj->template)){
+        if(isset($obj->template) && is_string($obj->template)){
             $this->setTemplate($obj->template);
         }
     }
@@ -85,17 +70,11 @@ class Form {
     protected function loadFieldsets($fieldsets)
     {
         foreach($fieldsets as $fieldset){
-            $newFieldset = new Fieldset($fieldset->name, isset($fieldset->label) ? $fieldset->label : null, null, isset($fieldset->attributes) ? $fieldset->attributes : null);
-            $newFieldset->setForm($this);
-            $newFieldset->loadFields($fieldset->fields);
-
-            if(isset($fieldset->template)){
-                $newFieldset->setTemplate($fieldset->template);
-            }
-
+            $newFieldset = new Fieldset((array)$fieldset);
             $this->addFieldset($newFieldset);
         }
     }
+
 
     /**
      * Add a fieldset to the form collection
@@ -109,41 +88,69 @@ class Form {
             throw new Error('addFieldset require an object of type Fieldset, '.get_class($fieldset).' received instead.');
         }
 
-        $this->fieldsets[$fieldset->name] = $fieldset;
+        $this->fieldsets[$fieldset->getAttribute('name')] = $fieldset;
+
         return $this;
     }
 
+
     /**
-     * Sets the name of the form
+     * Sets the name attribute of the form
      * @param String $name
      * @return $this
      */
     public function setName($name)
     {
-        $this->name = $name;
+        $this->attributes->name = $name;
         return $this;
     }
 
     /**
-     * Sets the action url of the form
+     * Returns the name attribute of the form
+     */
+    public function getName()
+    {
+        return $this->attributes->name;
+    }
+
+
+    /**
+     * Sets the action attribute of the form
      * @param String $action
      * @return $this
      */
     public function setAction($action)
     {
-        $this->action = $action;
+        $this->attributes->action = $action;
         return $this;
     }
 
     /**
-     * Sets the request method of the form
+     * Return the action attribute of the form
+     */
+    public function getAction()
+    {
+        return $this->attributes->action;
+    }
+
+
+    /**
+     * Sets the request method attribute of the form
      * @param String $method
      * @return $this
      */
     public function setMethod($method)
     {
-        $this->method = $method;
+        $this->attributes->method = $method;
         return $this;
+    }
+
+    /**
+     * Return the request method attribute of the form
+     */
+    public function getMethod()
+    {
+        return $this->attributes->method;
     }
 
     /**
@@ -153,74 +160,17 @@ class Form {
      */
     public function setEnctype($encoding)
     {
-        $this->enctype = $encoding;
+        $this->attributes->enctype = $encoding;
         return $this;
     }
 
-    /**
-     * Sets the attributes for the form
-     * @param Array|Object $attributes
-     * @return $this
-     * @throws Error
-     */
-    public function setAttributes($attributes)
-    {
-        if(!is_array($attributes) && !is_object($attributes)){
-            throw new Error('setAttributes expects an object or an array, '.gettype($attributes).' given');
-        }
-
-        $this->attributes = (object)$attributes;
-        return $this;
-    }
 
     /**
-     * Returns the form attributes
-     * @return Object
+     * Return the enctype attribute of the form
      */
-    public function getAttributes()
+    public function getEnctype()
     {
-        return $this->attributes;
-    }
-
-    /**
-     * Sets the html template splitted in an array
-     * @param Array $template
-     */
-    public function setTemplate($template)
-    {
-        if(!is_array($template) && !is_string($template)){
-            throw new Error('setTemplate expects an array or string, '.gettype($template).' given');
-        }
-
-        $this->template = $template;
-        return $this;
-    }
-
-    /**
-     * Loads a form template from a file
-     * @param String $path
-     */
-    public function loadTemplate($path)
-    {
-        if(!FS::exists($path)){
-            throw new Error('Form template file not found at the given path: '.$path);
-        }
-
-        $template = array(file_get_contents($path));
-        $this->setTemplate($template);
-    }
-
-    /**
-     * Return the html template
-     * @return string
-     */
-    public function getTemplate()
-    {
-        if(is_array($this->template)) {
-            return implode("\r\n", $this->template);
-        }
-
-        return $this->template;
+        return $this->attributes->enctype;
     }
 
     /**
@@ -244,6 +194,7 @@ class Form {
         return true;
     }
 
+
     /**
      * Sets the form fields values
      * @param Array $data
@@ -263,8 +214,11 @@ class Form {
             $this->setFieldValue($name, $value);
         }
 
+        $this->data = $data;
+
         return $this;
     }
+
 
     /**
      * Returns the form fields values
@@ -272,8 +226,9 @@ class Form {
      */
     public function getData()
     {
-
+        return $this->data;
     }
+
 
     /**
      * Sets the value of a given form field by name
@@ -288,6 +243,7 @@ class Form {
         }
         return $this;
     }
+
 
     /**
      * Returns the fields value
@@ -305,6 +261,7 @@ class Form {
         return null;
     }
 
+
     /**
      * Returns the list of fieldsets
      * @return array
@@ -313,6 +270,7 @@ class Form {
     {
         return $this->fieldsets;
     }
+
 
     /**
      * Return the list of Fieldsets
@@ -324,42 +282,18 @@ class Form {
         return $this->fieldsets[$name];
     }
 
-    /**
-     * Returns the list of errors from the validation method
-     * @return array
-     */
-    public function getErrors()
-    {
-        return $this->errors;
-    }
 
     /**
-     * Renders and echoes out the form in html
+     * Renders and returns the form in html
      */
-    public function render($return = false)
+    public function render()
     {
         $template = $this->getTemplate();
 
-        $template = str_replace("{{method}}", 'method="'.$this->method.'"', $template);
-        $template = str_replace("{{enctype}}", 'enctype="'.$this->enctype.'"', $template);
-
-        if($this->action){
-            $template = str_replace("{{action}}", 'action="' . $this->action . '"', $template);
-        } else {
-            $template = str_replace("{{action}}", '', $template);
-        }
-
-        if($this->name) {
-            $template = str_replace("{{name}}", 'name="' . $this->name . '"', $template);
-        } else {
-            $template = str_replace("{{name}}", '', $template);
-        }
-
-        if(count($this->getAttributes())){
+        if($this->attributes){
             $attributes = array();
-
-            foreach($this->getAttributes() as $attrName => $attrValue){
-                $attributes[] = $attrName.'="'.$attrValue.'"';
+            foreach($this->attributes as $attribute=>$value){
+                $attributes[] = $attribute.'="'.$value.'"';
             }
 
             $template = str_replace("{{attributes}}", implode(" ", $attributes), $template);
@@ -367,14 +301,11 @@ class Form {
             $template = str_replace("{{attributes}}", '', $template);
         }
 
-        if(count($this->fieldsets)){
+        if(count($this->getFieldsets())){
             $fieldsets = array();
 
             foreach($this->getFieldsets() as $fieldset){
-                ob_start();
-                $fieldset->render();
-                $fieldsets[] = ob_get_contents();
-                ob_end_clean();
+                $fieldsets[] = $fieldset->render();
             }
 
             $template = str_replace("{{fieldsets}}", implode("", $fieldsets), $template);
@@ -382,13 +313,11 @@ class Form {
             $template = str_replace("{{fieldsets}}", '', $template);
         }
 
-        if($return) return $template;
-
-        echo $template;
+        return $template;
     }
 
     public function __toString()
     {
-        return $this->render(true);
+        return $this->render();
     }
 }
