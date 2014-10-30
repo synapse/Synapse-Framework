@@ -35,10 +35,6 @@ class FormElement {
      * Returns the form attributes
      * @return Object
      */
-<<<<<<< HEAD
-    public function getAttributes()
-    {
-=======
     public function getAttributes($toString = false)
     {
         if($toString){
@@ -59,7 +55,6 @@ class FormElement {
             return '';
         }
 
->>>>>>> dev
         return $this->attributes;
     }
 
@@ -70,8 +65,6 @@ class FormElement {
      */
     public function setAttribute($name, $value)
     {
-<<<<<<< HEAD
-=======
         if(is_string($value) && $value === 'true'){
             $value = true;
         }
@@ -80,7 +73,6 @@ class FormElement {
             $value = false;
         }
 
->>>>>>> dev
         $this->attributes->$name = $value;
         return $this;
     }
@@ -90,15 +82,6 @@ class FormElement {
      * @param String $name
      * @return mixed
      */
-<<<<<<< HEAD
-    public function getAttribute($name)
-    {
-        if(!property_exists($this, $name)) return null;
-
-        return $this->attributes->$name;
-    }
-
-=======
     public function getAttribute($name, $toString = false)
     {
         if(!property_exists($this, $name)) return null;
@@ -119,7 +102,6 @@ class FormElement {
     {
         return property_exists($this->attributes, $name);
     }
->>>>>>> dev
 
     /**
      * Sets the html template splitted in an array
@@ -158,8 +140,6 @@ class FormElement {
         return $this->template;
     }
 
-<<<<<<< HEAD
-=======
     public function setError($error)
     {
         if(!is_string($error)){
@@ -168,7 +148,6 @@ class FormElement {
 
         $this->errors[] = $error;
     }
->>>>>>> dev
 
     /**
      * Returns the list of errors from the validation method

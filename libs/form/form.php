@@ -57,13 +57,6 @@ class Form extends FormElement {
         if(isset($obj->fieldsets) && is_array($obj->fieldsets) && count($obj->fieldsets)){
             $this->loadFieldsets($obj->fieldsets);
         }
-<<<<<<< HEAD
-
-        if(isset($obj->template) && is_string($obj->template)){
-            $this->setTemplate($obj->template);
-        }
-=======
->>>>>>> dev
     }
 
     /**
@@ -74,11 +67,8 @@ class Form extends FormElement {
     {
         foreach($fieldsets as $fieldset){
             $newFieldset = new Fieldset((array)$fieldset);
-<<<<<<< HEAD
-=======
             $newFieldset->setForm($this);
 
->>>>>>> dev
             $this->addFieldset($newFieldset);
         }
     }
@@ -297,22 +287,8 @@ class Form extends FormElement {
     {
         $template = $this->getTemplate();
 
-<<<<<<< HEAD
-        if($this->attributes){
-            $attributes = array();
-            foreach($this->attributes as $attribute=>$value){
-                $attributes[] = $attribute.'="'.$value.'"';
-            }
-
-            $template = str_replace("{{attributes}}", implode(" ", $attributes), $template);
-        } else {
-            $template = str_replace("{{attributes}}", '', $template);
-        }
-
-=======
         $template = str_replace("{{attributes}}", $this->getAttributes(true), $template);
 
->>>>>>> dev
         if(count($this->getFieldsets())){
             $fieldsets = array();
 

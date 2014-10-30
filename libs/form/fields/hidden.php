@@ -7,18 +7,16 @@
 
 defined('_INIT') or die;
 
-class FieldTypeHidden extends FieldType {
-
-    public $template = array("<input type='hidden' {{id}} {{name}} value='{{value}}' {{attributes}} {{required}} />");
+class HiddenFieldType extends FieldType {
 
     public function render()
     {
-        $this->replace('name', isset($this->field->name) ? 'name="'.$this->field->name.'"' : '')
-            ->replace('id', isset($this->field->id) ? 'id="'.$this->field->id.'"' : '')
-            ->replace('required', $this->field->required ? 'required=""' : '')
-            ->setAttributes('attributes', $this->field->getAttributes())
-            ->setValue('value', $this->field->getValue(), $this->field->getDefault());
+        $html = array();
 
-        return $this->getTemplate();
+        $value = $this->field->getValue() ? $this->field->getValue() : $this->field->getDefault();
+        $html[] = '<input name="'.$this->field->getName().'" type="hidden" value="'.$value.'" '.$this->field->getAttributes(true).' />';
+
+
+        return implode("", $html);
     }
 }
