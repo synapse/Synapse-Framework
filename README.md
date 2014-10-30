@@ -9,7 +9,7 @@ This repository is still in Beta. Please use it with caution.
 * PHP version 5.3 or newer.
 
 ## Changelog and Todo's
-You can find a list of changes for each release in the [CHANGES.md](https://github.com/synapse/Synapse-MVC/blob/master/CHANGES.md) file and a list of todo's and work in progress in the [TODO.md](https://github.com/synapse/Synapse-MVC/blob/master/TODOS.md) file.
+You can find a list of changes for each release in the [CHANGES.md](https://github.com/synapse/Synapse-MVC/blob/master/CHANGES.md) file and a list of todo's and work in progress in the [TODO.md](https://github.com/synapse/Synapse-MVC/blob/master/TODO.md) file.
 
 ## Third Party Libraries
 Synapse used these awesome 3rd party libraries:
