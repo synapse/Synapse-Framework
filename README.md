@@ -22,7 +22,7 @@ Synapse used these awesome 3rd party libraries:
 * [Curl](https://github.com/php-curl-class) licensed under public domain
 
 ## License
-Please see the [LICENSE](https://github.com/synapse/Synapse-MVC/blob/master/LICENSE) file
+The Synapse framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
 
 ## Contribute
 If you want to contribute or report bugs please use the [issue tracker](https://github.com/synapse/Synapse-MVC/issues) or drop me a line at: 
@@ -31,3 +31,7 @@ If you want to contribute or report bugs please use the [issue tracker](https://
 ```php
 <?= base64_decode('Y3Jpc3RpYW4uYmFybHV0aXVAZ21haWwuY29t'); ?>
 ```
+
+
+## Support us
+[![PayPayl donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=UXVKKU24R3N8G "Donate to this project using Paypal")
