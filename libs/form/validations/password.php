@@ -7,9 +7,9 @@
 
 defined('_INIT') or die;
 
-class FieldValidatePassword {
+class PasswordFieldValidate {
 
-    public function test($value, $field = null, $validator = null)
+    public static function test($value, $field = null, $validator = null)
     {
         $length = strlen($value);
 
