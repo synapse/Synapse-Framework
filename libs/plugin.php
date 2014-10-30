@@ -18,6 +18,7 @@ class Plugin {
         {
             if($evt == $event)
             {
+                //TODO: check if method exists before calling it
                 call_user_func_array(array(get_called_class(), $method), $par);
                 return true;
             }

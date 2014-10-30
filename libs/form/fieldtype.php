@@ -9,7 +9,10 @@ defined('_INIT') or die;
 
 class FieldType {
 
+<<<<<<< HEAD
     protected $template = '';
+=======
+>>>>>>> dev
     protected $field = null;
 
     public function __construct($field)
@@ -17,6 +20,7 @@ class FieldType {
         $this->field = $field;
     }
 
+<<<<<<< HEAD
     public function getTemplate()
     {
         return $this->template;
@@ -137,6 +141,8 @@ class FieldType {
         return $this;
     }
 
+=======
+>>>>>>> dev
     public function validate()
     {
         return true;

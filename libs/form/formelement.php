@@ -35,8 +35,31 @@ class FormElement {
      * Returns the form attributes
      * @return Object
      */
+<<<<<<< HEAD
     public function getAttributes()
     {
+=======
+    public function getAttributes($toString = false)
+    {
+        if($toString){
+            if($this->attributes){
+                $attributes = array();
+                foreach($this->attributes as $attribute=>$value){
+
+                    if($value) {
+                        $attributes[] = $attribute . '="' . (string)$value . '"';
+                    } else {
+                        $attributes[] = $attribute;
+                    }
+                }
+
+                return implode(" ", $attributes);
+            }
+
+            return '';
+        }
+
+>>>>>>> dev
         return $this->attributes;
     }
 
@@ -47,6 +70,17 @@ class FormElement {
      */
     public function setAttribute($name, $value)
     {
+<<<<<<< HEAD
+=======
+        if(is_string($value) && $value === 'true'){
+            $value = true;
+        }
+
+        if(is_string($value) && $value === 'false'){
+            $value = false;
+        }
+
+>>>>>>> dev
         $this->attributes->$name = $value;
         return $this;
     }
@@ -56,6 +90,7 @@ class FormElement {
      * @param String $name
      * @return mixed
      */
+<<<<<<< HEAD
     public function getAttribute($name)
     {
         if(!property_exists($this, $name)) return null;
@@ -63,6 +98,28 @@ class FormElement {
         return $this->attributes->$name;
     }
 
+=======
+    public function getAttribute($name, $toString = false)
+    {
+        if(!property_exists($this, $name)) return null;
+
+        if($toString){
+            return $name.'="'.(string)$this->attributes->$name.'"';
+        }
+
+        return $this->attributes->$name;
+    }
+
+    /**
+     * Checks if the given attribute exists
+     * @param String $name
+     * @return bool
+     */
+    public function hasAttribute($name)
+    {
+        return property_exists($this->attributes, $name);
+    }
+>>>>>>> dev
 
     /**
      * Sets the html template splitted in an array
@@ -101,6 +158,17 @@ class FormElement {
         return $this->template;
     }
 
+<<<<<<< HEAD
+=======
+    public function setError($error)
+    {
+        if(!is_string($error)){
+            throw new Error('setError expects a string, '.gettype($error).' given');
+        }
+
+        $this->errors[] = $error;
+    }
+>>>>>>> dev
 
     /**
      * Returns the list of errors from the validation method

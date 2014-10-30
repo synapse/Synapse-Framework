@@ -57,10 +57,13 @@ class Form extends FormElement {
         if(isset($obj->fieldsets) && is_array($obj->fieldsets) && count($obj->fieldsets)){
             $this->loadFieldsets($obj->fieldsets);
         }
+<<<<<<< HEAD
 
         if(isset($obj->template) && is_string($obj->template)){
             $this->setTemplate($obj->template);
         }
+=======
+>>>>>>> dev
     }
 
     /**
@@ -71,6 +74,11 @@ class Form extends FormElement {
     {
         foreach($fieldsets as $fieldset){
             $newFieldset = new Fieldset((array)$fieldset);
+<<<<<<< HEAD
+=======
+            $newFieldset->setForm($this);
+
+>>>>>>> dev
             $this->addFieldset($newFieldset);
         }
     }
@@ -204,8 +212,7 @@ class Form extends FormElement {
     public function setData($data = array())
     {
         if(!is_array($data) && !is_object($data)){
-            //throw new Error('setData expects an object or an array, '.gettype($data).' given');
-            return $this;
+            throw new Error('setData expects an object or an array, '.gettype($data).' given');
         }
 
         $data = (array)$data;
@@ -252,7 +259,7 @@ class Form extends FormElement {
      */
     public function getFieldValue($name)
     {
-        foreach($this->fieldsets as $fieldset){
+        foreach($this->getFieldsets() as $fieldset){
             if($fieldset->hasField($name)){
                 return $fieldset->getFieldValue($name);
             }
@@ -290,6 +297,7 @@ class Form extends FormElement {
     {
         $template = $this->getTemplate();
 
+<<<<<<< HEAD
         if($this->attributes){
             $attributes = array();
             foreach($this->attributes as $attribute=>$value){
@@ -301,6 +309,10 @@ class Form extends FormElement {
             $template = str_replace("{{attributes}}", '', $template);
         }
 
+=======
+        $template = str_replace("{{attributes}}", $this->getAttributes(true), $template);
+
+>>>>>>> dev
         if(count($this->getFieldsets())){
             $fieldsets = array();
 

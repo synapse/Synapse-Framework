@@ -81,6 +81,29 @@ class Fieldset extends FormElement {
         return $this->fields;
     }
 
+<<<<<<< HEAD
+
+    /**
+     * Sets the fieldset label
+     * @param String $text
+     * @return $this
+     */
+    public function setLabel($text)
+    {
+        $this->label = $text;
+
+        return $this;
+    }
+
+
+    /**
+     * Return the fieldset label
+     * @return String
+     */
+    public function getLabel()
+    {
+        return $this->label;
+=======
 
     /**
      * Sets the fieldset label
@@ -104,6 +127,14 @@ class Fieldset extends FormElement {
         return $this->label;
     }
 
+    public function getField($name)
+    {
+        if(!isset($this->fields[$name])) return $this->fields[$name];
+
+        return null;
+>>>>>>> dev
+    }
+
     /**
      * Sets the value of a given Field
      * @param String $name
@@ -112,9 +143,11 @@ class Fieldset extends FormElement {
      */
     public function setFieldValue($name, $value)
     {
-        if(!isset($this->fields[$name])) return $this;
+        if(!$this->hasField($name)) {
+            throw new Error( __('Field {1} not found.', $name) );
+        }
 
-        $this->fields[$name]->setValue($value);
+        $this->getField($name)->setValue($value);
         return $this;
     }
 
@@ -154,7 +187,7 @@ class Fieldset extends FormElement {
 
                 $error = new stdClass();
                 $error->field = $field;
-                $error->message = $field->getError();
+                $error->messages = $field->getErrors();
 
                 $errors[] = $error;
             }
@@ -204,6 +237,7 @@ class Fieldset extends FormElement {
     {
         $template = $this->getTemplate();
 
+<<<<<<< HEAD
         if($this->attributes){
             $attributes = array();
             foreach($this->attributes as $attribute=>$value){
@@ -219,6 +253,9 @@ class Fieldset extends FormElement {
         } else {
             $template = str_replace("{{attributes}}", '', $template);
         }
+=======
+        $template = str_replace("{{attributes}}", $this->getAttributes(true), $template);
+>>>>>>> dev
 
 
         if($this->label) {
@@ -227,7 +264,10 @@ class Fieldset extends FormElement {
             $template = str_replace("{{label}}", '', $template);
         }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
         if(count($this->getFields())){
             $fields = array();
 
