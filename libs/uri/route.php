@@ -13,8 +13,8 @@ class Route {
     private $methods        = array('GET','POST','PUT','DELETE', 'MODULE');
     private $controller     = null;
     private $controllerPath = null;
-    private $middleware     = null;
-    private $mAction        = null;
+    private $middlewares    = array();
+    //private $mAction        = null;
     private $action         = null;
     private $params         = null;
     private $tokens         = array();
@@ -99,22 +99,62 @@ class Route {
 
     /**
      * Sets the middleware class for this route
-     * @param $middleware
+     * @param Array $middlewares
      * @return $this
      */
-    public function setMiddleware($middleware)
+    public function setMiddlewares($middlewares = array())
     {
-        $middleware = explode('.', $middleware);
+        if(!is_array($middlewares)){
+            throw new Error('setMiddlewares expects an array, '.gettype($middlewares).' given');
+        }
 
-        $this->middleware = $middleware[0];
+        foreach($middlewares as $i=>$middleware) {
+            $middleware = explode('.', $middleware);
 
-        if(count($middleware) != 2){
-            $this->mAction = 'index';
-        } else {
-            $this->mAction = $middleware[1];
+            if(!is_array($middlewares) || (is_array($middlewares) && empty($middlewares[0]))){
+                throw new Error('Middlewares is baddly formated');
+            }
+
+            $middlewareObject = new stdClass();
+
+            $middlewareName = explode('/', $middleware[0]);
+
+
+            if(count($middlewareName) >= 2) {
+                $middlewareObject->name = array_pop($middlewareName);
+                $middlewareObject->path = implode("/", $middlewareName);
+            } else {
+                $middlewareObject->name = $middleware[0];
+                $middlewareObject->path = null;
+            }
+
+            if (count($middleware) != 2) {
+                $middlewareObject->action = 'index';
+            } else {
+                $middlewareObject->action = $middleware[1];
+            }
+
+            $this->addMiddleware($middlewareObject);
         }
 
         return $this;
+    }
+
+    public function addMiddleware($middleware)
+    {
+        if(!is_object($middleware)){
+            throw new Error('addMiddleware expects an object, '.gettype($middleware).' given');
+        }
+
+        if(!property_exists($middleware, 'name')){
+            throw new Error("Middleware object does not contain a 'name' property");
+        }
+
+        if(!property_exists($middleware, 'action')){
+            throw new Error("Middleware object does not contain a 'action' property");
+        }
+
+        $this->middlewares[] = $middleware;
     }
 
     /**
@@ -148,11 +188,11 @@ class Route {
 
     /**
      * Returns the middleware class of this route
-     * @return String
+     * @return Array
      */
-    public function getMiddleware()
+    public function getMiddlewares()
     {
-        return $this->middleware;
+        return $this->middlewares;
     }
 
     /**
@@ -164,14 +204,14 @@ class Route {
         return $this->controllerPath;
     }
 
-    /**
-     * Returns the middleware class method of this route
-     * @return String
-     */
-    public function getMiddlewareAction()
-    {
-        return $this->mAction;
-    }
+//    /**
+//     * Returns the middleware class method of this route
+//     * @return String
+//     */
+//    public function getMiddlewareAction()
+//    {
+//        return $this->mAction;
+//    }
 
     /**
      * Returns the segments of this route

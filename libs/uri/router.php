@@ -110,7 +110,12 @@ class Router {
               ->setControllerPath(CONTROLLERS);
 
         if($middleware){
-            $route->setMiddleware($middleware);
+
+            if(is_string($middleware)){
+                $middleware = array($middleware);
+            }
+
+            $route->setMiddlewares($middleware);
         }
 
         $this->addRoute($route);
@@ -202,8 +207,8 @@ class Router {
             die('404 Route not found');
         }
 
-        if($this->current->getMiddleware()){
-            $this->_execMiddleware($request);
+        if(count($this->current->getMiddlewares())){
+            $this->_execMiddlewares($request);
         }
 
         $this->_execController($request);
@@ -237,32 +242,34 @@ class Router {
         $controller->$controllerMethod();
     }
 
-    protected function _execMiddleware($request)
+    protected function _execMiddlewares($request)
     {
-        $middlewareFileName = strtolower($this->current->getMiddleware()).'.php';
-        $middlearePath = MIDDLEWARES.'/'.$middlewareFileName;
-        if(!file_exists($middlearePath)){
-            throw new Error( __('Middleware file not found: "{1}"', $middlewareFileName), null );
+        $middlewares = $this->current->getMiddlewares();
+
+        foreach($middlewares as $i=>$middleware) {
+            $middlewareFileName = strtolower($middleware->name) . '.php';
+            $middlearePath = MIDDLEWARES . '/' . $middleware->path . $middlewareFileName;
+            if (!file_exists($middlearePath)) {
+                throw new Error(__('Middleware file not found: "{1}"', $middlewareFileName), null);
+            }
+
+            require_once($middlearePath);
+
+            $middlewareClass = ucfirst($middleware->name) . 'Middleware';
+            $middlewareMethod = $middleware->action;
+
+            if (!class_exists($middlewareClass)) {
+                throw new Error(__('Middleware class not found!') . ' ' . $middlewareClass);
+            }
+
+            $middleware = new $middlewareClass($this, $this->current->getParams(), $request->getParams());
+
+            if (!method_exists($middleware, $middlewareMethod)) {
+                throw new Error(__('Middleware class method "{1}" not found in class "{2}"', $middlewareMethod, $middlewareClass), null);
+            }
+
+            $middleware->$middlewareMethod();
         }
-
-        require_once($middlearePath);
-
-        $middleware = explode("/", $this->current->getMiddleware());
-
-        $middlewareClass  = ucfirst(array_pop($middleware)).'Middleware';
-        $middlewareMethod = $this->current->getMiddlewareAction();
-
-        if(!class_exists($middlewareClass)){
-            throw new Error( __('Middleware class not found!').' '.$middlewareClass );
-        }
-
-        $middleware = new $middlewareClass($this, $this->current->getParams(), $request->getParams());
-
-        if(!method_exists($middleware, $middlewareMethod)){
-            throw new Error( __('Middleware class method "{1}" not found in class "{2}"', $middlewareMethod, $middlewareClass), null );
-        }
-
-        $middleware->$middlewareMethod();
     }
 
 
