@@ -19,6 +19,7 @@ Synapse used these awesome 3rd party libraries:
 * [IDNA Convert](https://github.com/etechnika/idna-convert) licensed under the GNU 2.1 license
 * [PHPMailer](https://github.com/PHPMailer/PHPMailer) licensed under the GNU 2.1 license
 * **phputf8** licensed under the GNU 2.1 license
+* [Curl](https://github.com/php-curl-class) licensed under public domain
 
 ## License
 Please see the [LICENSE](https://github.com/synapse/Synapse-MVC/blob/master/LICENSE) file
