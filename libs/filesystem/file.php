@@ -467,6 +467,11 @@ class File
 	}
     */
 
+    public static function create($path)
+    {
+        return fopen($path, 'w');
+    }
+
 	/**
 	 * Wrapper for the standard file_exists function
 	 * @param   string  $file  File path
@@ -486,4 +491,9 @@ class File
 	{
         return basename($file);
 	}
+
+    public static function append($path, $data)
+    {
+        return file_put_contents($path, $data, FILE_APPEND);
+    }
 }

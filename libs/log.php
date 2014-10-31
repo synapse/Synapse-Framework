@@ -35,23 +35,36 @@ class Log
 
         $db = App::getDBO();
 
-        $log            = new stdClass;
-		$log->timestamp = date('Y-m-d H:i:s');
+        $log = new stdClass;
+        $log->timestamp = date('Y-m-d H:i:s');
 
-        if(is_string($message)):
-		    $log->message   = $message;
+        if (is_string($message)):
+            $log->message = $message;
         else:
-            $log->message   = '->';
-            $log->object    = addslashes(print_r($message, true));
+            $log->message = '->';
+            $log->object = addslashes(print_r($message, true));
         endif;
 
-		$log->type      = $type;
-		$log->backtrace = addslashes( print_r(debug_backtrace(false),true) );
-		$log->url       = Log::curPageURL();
+        $log->type = $type;
+        $log->backtrace = addslashes(print_r(debug_backtrace(false), true));
+        $log->url = Log::curPageURL();
 
-		$db->insertObject('#__logs', $log, 'id');
+        if($db) {
+            $db->insertObject('#__logs', $log, 'id');
+            return $log->id;
+        }
 
-		return $log->id;
+        if(!Folder::exists(LOGS)){
+            Folder::create(LOGS);
+        }
+
+        $logFile = LOGS.'/logs.php';
+
+        if(!File::exists($logFile)){
+            File::create($logFile);
+        }
+
+        File::append($logFile, '['.$log->timestamp.']['.$log->type.'] '.$log->message.' -> '.$log->url."\r\n");
     }
 
     public function _($message)

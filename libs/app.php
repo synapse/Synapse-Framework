@@ -33,7 +33,7 @@ class App {
 	public static function getDBO()
 	{
         $config = self::getConfig();
-        if(!$config->db_host) return null;
+        if(empty($config->db_host)) return null;
         
         if(!self::$dbo){
             $options = array(
