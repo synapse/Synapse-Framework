@@ -90,7 +90,7 @@ class Router {
             $language->load($json);
         }
 
-        $moduleRoutes = new $routesClass($module, $segments, $this);
+        $moduleRoutes = new $routesClass($module, $segments, $this, $middleware);
         $moduleRoutes->getRoutes();
     }
 
@@ -110,7 +110,6 @@ class Router {
               ->setControllerPath(CONTROLLERS);
 
         if($middleware){
-
             if(is_string($middleware)){
                 $middleware = array($middleware);
             }

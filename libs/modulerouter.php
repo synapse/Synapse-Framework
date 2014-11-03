@@ -12,17 +12,19 @@ class ModuleRouter {
     protected $router;
     protected $module;
     protected $baseURL;
+    protected $middleware;
 
-    public function __construct($module, $url, $router)
+    public function __construct($module, $url, $router, $middleware)
     {
-        $this->router   = $router;
-        $this->module   = $module;
-        $this->baseURL  = $url;
+        $this->router       = $router;
+        $this->module       = $module;
+        $this->baseURL      = $url;
+        $this->middleware   = $middleware;
     }
 
     public function getRoutes()
     {
-
+        throw new Error( __('This method should be overwritten!') );
     }
 
     /**
@@ -79,6 +81,14 @@ class ModuleRouter {
               ->setMethods($type)
               ->setAction($action)
               ->setControllerPath(MODULES.'/'.$this->module.'/controllers');
+
+        if($this->middleware){
+            if(is_string($this->middleware)){
+                $this->middleware = array($this->middleware);
+            }
+
+            $route->setMiddlewares($this->middleware);
+        }
 
         $route->moduleName = $this->module;
         $route->baseURL = $this->baseURL;
