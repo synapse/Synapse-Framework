@@ -25,7 +25,7 @@ class UserHelper
         $query->select('*')
             ->from('#__users')
             ->where('username = '.$db->quote($username))
-            ->where('password = '. $db->quote(md5($password)));
+            ->where('password = '. $db->quote($password));
 
         $user = $db->setQuery($query)->loadObject();
 
