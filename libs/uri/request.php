@@ -27,18 +27,25 @@ class Request {
 
         switch($this->type){
             case 'GET':
-            case 'DELETE':
                 $request = $_GET;
                 break;
+            case 'DELETE':
+                parse_str(file_get_contents('php://input'), $request);
+                break;
             case 'POST':
-            case 'PUT':
                 $request = $_POST;
 
                 if(count($_FILES))
                 {
                     $this->files = $_FILES;
                 }
-
+                break;
+            case 'PUT':
+                parse_str(file_get_contents('php://input'), $request);
+                if(count($_FILES))
+                {
+                    $this->files = $_FILES;
+                }
                 break;
         }
 
