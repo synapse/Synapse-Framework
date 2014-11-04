@@ -51,7 +51,7 @@ class UserHelper
      * @param String $value
      * @return bool|mixed
      */
-    public static function getByField($field, $value)
+    public static function getByField($field, $value, $first = false)
     {
         $db = App::getDBO();
         $query = $db->getQuery(true);
@@ -60,9 +60,13 @@ class UserHelper
             ->from('#__users')
             ->where($field.' = '.$db->quote($value));
         $db->setQuery($query);
-        $user = $db->loadObjectList();
+        $users = $db->loadObjectList();
 
-        return $user;
+        if($first){
+            return array_shift($users);
+        }
+
+        return $users;
     }
 
     public function update($user)
