@@ -60,13 +60,12 @@ class UserHelper
             ->from('#__users')
             ->where($field.' = '.$db->quote($value));
         $db->setQuery($query);
-        $users = $db->loadObjectList();
 
         if($first){
-            return array_shift($users);
+            return $db->loadObject();
         }
 
-        return $users;
+        return $db->loadObjectList();
     }
 
     public function update($user)
