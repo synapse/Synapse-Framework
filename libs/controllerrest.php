@@ -15,7 +15,7 @@ class ControllerRest extends Controller
      * @param String $method
      * @param Array $params
      */
-    protected function render($model, $method, $params, $callback = null)
+    protected function render($model, $method, $params, $jsonp = false, $callback = null)
     {
         $data   = new stdClass();
         $object = call_user_func_array(array($model, $method), $params);
@@ -34,8 +34,13 @@ class ControllerRest extends Controller
             }
         }
 
-        echo json_encode($data);
-
+        header('Content-Type: text/javascript; charset=UTF-8');
+        
+        if(!empty($jsonp)){
+            echo $jsonp.'('.json_encode($data).')';
+        } else {
+            echo json_encode($data);
+        }
 
         ob_start();
         if($callback){
