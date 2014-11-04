@@ -131,7 +131,7 @@ class App {
         foreach(glob(PLUGINS."/*.php") as $pluginFile){
             include($pluginFile);
             $pluginFile = File::getName($pluginFile);
-            $plugin     = ucfirst(File::stripExt($pluginFile));
+            $plugin     = ucfirst(File::stripExt($pluginFile)).'Plugin';
             //TODO: check if the plugin class exists before calling the dispatch on it
             //TODO: check if method dispatch exists before calling it
             $plugin::dispatch($event, $params);
