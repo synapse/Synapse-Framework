@@ -260,12 +260,13 @@ abstract class Folder
 		$excludefilter = array('^\..*', '.*~'))
 	{
 		// Check to make sure the path valid and clean
-		$path = JPath::clean($path);
+		$path = Path::clean($path);
 
 		// Is the path a folder?
 		if (!is_dir($path))
 		{
-			JLog::add(JText::sprintf('JLIB_FILESYSTEM_ERROR_PATH_IS_NOT_A_FOLDER_FILES', $path), JLog::WARNING, 'jerror');
+			//JLog::add(JText::sprintf('JLIB_FILESYSTEM_ERROR_PATH_IS_NOT_A_FOLDER_FILES', $path), JLog::WARNING, 'jerror');
+			throw new Error( __('The path given is not a folder: "{1}"', $path), null );
 			return false;
 		}
 
@@ -305,12 +306,13 @@ abstract class Folder
 		$excludefilter = array('^\..*'))
 	{
 		// Check to make sure the path valid and clean
-		$path = JPath::clean($path);
+		$path = Path::clean($path);
 
 		// Is the path a folder?
 		if (!is_dir($path))
 		{
-			JLog::add(JText::sprintf('JLIB_FILESYSTEM_ERROR_PATH_IS_NOT_A_FOLDER_FOLDER', $path), JLog::WARNING, 'jerror');
+			//JLog::add(JText::sprintf('JLIB_FILESYSTEM_ERROR_PATH_IS_NOT_A_FOLDER_FOLDER', $path), JLog::WARNING, 'jerror');
+			throw new Error( __('The path given is not a folder: "{1}"', $path), null );
 			return false;
 		}
 

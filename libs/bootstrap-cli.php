@@ -2,8 +2,13 @@
 
 /**
  * @package     Synapse
- * @subpackage  Bootstrap
+ * @subpackage  Cli Bootstrap
  */
+
+define('ROOT_PATH', dirname(dirname(__FILE__)));		// root path of the website
+define('LIBRARY', ROOT_PATH.'/libs');			        // framework path
+
+include('defines.php');
 
 defined('_INIT') or die;
 
@@ -23,9 +28,5 @@ include(LIBRARY.'/functions.php');
 include(LIBRARY.'/loader.php');
 // register the class autoloader
 Loader::register();
-// get the first app instance
-$app = App::getInstance();
-// include the routes
-include(ROUTES);
-// run the application
-$app->run();
+
+
