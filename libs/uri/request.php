@@ -9,23 +9,23 @@ defined('_INIT') or die;
 
 class Request {
 
-    protected $params       = '';
-    protected $type         = null;
-    protected $slugs        = null;
-    protected $ajax         = true;
-    protected $files        = array();
-    protected $contentType  = null;
-    protected $origin       = null;
-    protected $userAgent    = null;
+    protected $_params       = '';
+    protected $_type         = null;
+    protected $_slugs        = null;
+    protected $_ajax         = true;
+    protected $_files        = array();
+    protected $_contentType  = null;
+    protected $_origin       = null;
+    protected $_userAgent    = null;
 
     public function __construct()
     {
-        $this->params = new stdClass();
+        $this->_params = new stdClass();
 
         $request     = null;
-        $this->type = $this->getType();
+        $this->_type = $this->getType();
 
-        switch($this->type){
+        switch($this->_type){
             case 'GET':
                 $request = $_GET;
                 break;
@@ -37,58 +37,58 @@ class Request {
 
                 if(count($_FILES))
                 {
-                    $this->files = $_FILES;
+                    $this->_files = $_FILES;
                 }
                 break;
             case 'PUT':
                 parse_str(file_get_contents('php://input'), $request);
                 if(count($_FILES))
                 {
-                    $this->files = $_FILES;
+                    $this->_files = $_FILES;
                 }
                 break;
         }
 
-        $this->contentType  = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : null;
-        $this->origin       = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : null;
-        $this->userAgent    = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
+        $this->_contentType  = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : null;
+        $this->_origin       = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : null;
+        $this->_userAgent    = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
 
         if(count($request)){
             foreach($request as $k=>$v){
                 if($k === 'slug'){
-                    $this->slugs = $v;
+                    $this->_slugs = $v;
                     continue;
                 }
-                $this->params->$k = $v;
+                $this->_params->$k = $v;
                 $this->$k = $v;
             }
         }
 
-        if(in_array($this->type, array('POST','PUT')) && count($this->getFiles()))
+        if(in_array($this->_type, array('POST','PUT')) && count($this->getFiles()))
         {
-            $this->params->files = $this->getFiles();
+            $this->_params->files = $this->getFiles();
         }
 
         if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
         {
-            $this->ajax = true;
+            $this->_ajax = true;
         }
     }
 
     public function getParams()
     {
-        return $this->params;
+        return $this->_params;
     }
 
     public function getSlugs()
     {
-        return $this->slugs;
+        return $this->_slugs;
     }
 
     public function getValue($key)
     {
-        return isset($this->params->$key)?$this->params->$key:null;
+        return isset($this->_params->$key) ? $this->_params->$key : null;
     }
 
     public function setValue($key, $value)
@@ -98,7 +98,7 @@ class Request {
 
     public function parseJSON()
     {
-        if(strpos($this->contentType, 'application/json') === false){
+        if(strpos($this->_contentType, 'application/json') === false){
             return null;
         }
 
@@ -112,7 +112,7 @@ class Request {
      */
     public function getType()
     {
-        if($this->type) return $this->type;
+        if($this->_type) return $this->_type;
 
         if(isset($_POST['_METHOD']) && !empty($_POST['_METHOD'])){
             $method = $_POST['_METHOD'];
@@ -133,12 +133,12 @@ class Request {
      */
     public function isAjax()
     {
-        return $this->ajax;
+        return $this->_ajax;
     }
 
     public function getFiles()
     {
-        return $this->files;
+        return $this->_files;
     }
 
     /**
@@ -215,7 +215,7 @@ class Request {
      */
     public function getContentType()
     {
-        return $this->contentType;
+        return $this->_contentType;
     }
 
     /**
@@ -224,7 +224,7 @@ class Request {
      */
     public function getUserAgent()
     {
-        return $this->userAgent;
+        return $this->_userAgent;
     }
 
     /**
@@ -233,7 +233,7 @@ class Request {
      */
     public function getOrigin()
     {
-        return $this->origin;
+        return $this->_origin;
     }
 }
 

@@ -68,6 +68,41 @@ class UserHelper
         return $db->loadObjectList();
     }
 
+    /**
+     * @param array $fields
+     * @param bool $first
+     * @param array $options
+     * > glue => AND / OR
+     * > like => true / false
+     * @return array|mixed
+     * @throws Error
+     */
+    public function getByFields($fields = array(), $first = false, $options = array())
+    {
+        if(!count($fields)) return null;
+
+        $db = App::getDBO();
+        $query = $db->getQuery(true);
+
+        $query->select('*')
+            ->from('#__users');
+
+        $glue = array_key_exists('glue', $options) ? $options['glue'] : 'AND';
+        $like = (array_key_exists('like', $options) && $options['like']) ? 'LIKE' : '=';
+
+        foreach($fields as $field => $value){
+            $query->where($field .' '.$like.' '.$db->quote($value), $glue);
+        }
+
+        $db->setQuery($query);
+
+        if($first){
+            return $db->loadObject();
+        }
+
+        return $db->loadObjectList();
+    }
+
     public function update($user)
     {
         $db = App::getDBO();
