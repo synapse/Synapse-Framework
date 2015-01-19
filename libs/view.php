@@ -107,6 +107,10 @@ class View extends Object {
             extract($_data);
         }
 
+        if(!$this->template){
+            throw new Error( __('Template is missing!') );
+        }
+        
 		ob_start();
 
 		require($this->template);

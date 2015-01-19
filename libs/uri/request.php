@@ -3,20 +3,22 @@
 /**
  * @package     Synapse
  * @subpackage  URI/Request
+ * @ver         1.2
  */
 
 defined('_INIT') or die;
 
 class Request {
 
-    protected $_params       = '';
-    protected $_type         = null;
-    protected $_slugs        = null;
-    protected $_ajax         = true;
-    protected $_files        = array();
-    protected $_contentType  = null;
-    protected $_origin       = null;
-    protected $_userAgent    = null;
+    protected $_params      = '';
+    protected $_type        = null;
+    protected $_slugs       = null;
+    protected $_ajax        = true;
+    protected $_files       = array();
+    protected $_contentType = null;
+    protected $_origin      = null;
+    protected $_userAgent   = null;
+    protected $_headers     = array();
 
     public function __construct()
     {
@@ -53,6 +55,9 @@ class Request {
         $this->_origin       = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : null;
         $this->_userAgent    = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
 
+        // read the request headers
+        $this->readHeaders();
+
         if(count($request)){
             foreach($request as $k=>$v){
                 if($k === 'slug'){
@@ -70,7 +75,7 @@ class Request {
         }
 
         if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
         {
             $this->_ajax = true;
         }
@@ -234,6 +239,65 @@ class Request {
     public function getOrigin()
     {
         return $this->_origin;
+    }
+
+    protected function readHeaders()
+    {
+        // if not Apache
+        if (!function_exists('getallheaders'))
+        {
+            $headers = '';
+            foreach ($_SERVER as $name => $value)
+            {
+                if (substr($name, 0, 5) == 'HTTP_')
+                {
+                    $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+                }
+            }
+            $this->_headers = $headers;
+        } else {
+            $this->_headers = getallheaders();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns a list of headers
+     * @return mixed
+     */
+    public function getHeaders()
+    {
+        return $this->_headers;
+    }
+
+    /**
+     * @param String $key
+     * @return String | mixed
+     * @throws Error
+     */
+    public function getHeader($key = null)
+    {
+        if(!$key)
+        {
+            throw new Error( __('Header name missing!'), null );
+        }
+
+        $headers = $this->getHeaders();
+
+        if(!array_key_exists($key, $headers)) return null;
+
+        return $headers[$key];
+    }
+
+    /**
+     * Sets a header key with the specified value
+     * @param $key
+     * @param $value
+     */
+    public function setHeader($key, $value)
+    {
+        $this->_headers[$key] = $value;
     }
 }
 

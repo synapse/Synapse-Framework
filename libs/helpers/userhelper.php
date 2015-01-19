@@ -3,6 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage  Helpers/User
+ * @ver         1.0.1
  */
 
 defined('_INIT') or die;
@@ -20,6 +21,7 @@ class UserHelper
     public static function login($username, $password)
     {
         $db = App::getDBO();
+        if(!$db) return;
 
         $query = $db->getQuery(true);
         $query->select('*')
@@ -54,6 +56,8 @@ class UserHelper
     public static function getByField($field, $value, $first = false)
     {
         $db = App::getDBO();
+        if(!$db) return;
+        
         $query = $db->getQuery(true);
 
         $query->select('*')
@@ -82,6 +86,8 @@ class UserHelper
         if(!count($fields)) return null;
 
         $db = App::getDBO();
+        if(!$db) return;
+        
         $query = $db->getQuery(true);
 
         $query->select('*')
@@ -106,6 +112,7 @@ class UserHelper
     public function update($user)
     {
         $db = App::getDBO();
+        if(!$db) return;
 
         if(!$db->updateObject('#__users', $user, 'id', true)){
             return false;
