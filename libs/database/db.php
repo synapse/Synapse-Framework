@@ -611,4 +611,15 @@ class DB extends mysqli {
     {
         return $this->setQuery('ALTER TABLE '.$this->quoteName($table).' DROP '.$this->quoteName($column))->execute();
     }
+
+	/**
+	 * Counts all the rows when using a limit
+	 * @return Integer
+	 */
+	public function getTotalCount()
+	{
+		$this->setQuery('SELECT FOUND_ROWS() AS count');
+		$count = $this->loadObject();
+		return $count->count;
+	}
 }

@@ -48,15 +48,20 @@ class Query {
 	 * $query->select(array('a.*', 'b.id'));
 	 *
 	 * @param   mixed  $columns  A string or an array of field names.
+	 * @param   Boolean  $count  If true will count all rows when using a limit.
 	 *
 	 * @return  Query  Returns this object to allow chaining.
 	 */
-    public function select($columns)
+    public function select($columns, $count = false)
     {
         $this->type = 'select';
 
 		if (is_null($this->select)){
-			$this->select = new QueryElement('SELECT', $columns);
+			if($count){
+				$this->select = new QueryElement('SELECT SQL_CALC_FOUND_ROWS', $columns);
+			} else {
+				$this->select = new QueryElement('SELECT', $columns);
+			}
 		} else {
 			$this->select->append($columns);
 		}
