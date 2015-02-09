@@ -101,7 +101,7 @@ class Request {
         $this->$key = $value;
     }
 
-    public function parseJSON()
+    public function getJSON()
     {
         if(strpos($this->_contentType, 'application/json') === false){
             return null;
