@@ -31,13 +31,13 @@ class DB extends mysqli {
 	{
 		$this->close();
 	}
-	
+
 	public function setQuery($query)
 	{
 		$this->query = $query;
         return $this;
 	}
-	
+
 	public function execute()
 	{
 		return $this->query($this->query);
@@ -66,19 +66,19 @@ class DB extends mysqli {
         }
 
 		$return = array();
-		
+
 		while ($cols = $results->fetch_assoc()) {
 			$return[] = $cols;
 		}
-		
+
 		return $return;
 	}
-	
+
 	public function loadObjectList()
 	{
 		$items = $this->loadAssocList();
 		$return = array();
-		
+
 		foreach($items as $item){
 			$row = new stdClass();
 			foreach ($item as $key => $value){
@@ -86,10 +86,10 @@ class DB extends mysqli {
 			}
 			$return[] = $row;
 		}
-		
+
 		return $return;
 	}
-	
+
 	public function loadObject()
 	{
         $objects = $this->loadObjectList();
@@ -231,7 +231,7 @@ class DB extends mysqli {
 		return true;
 	}
 
-	
+
 	public function escape($text, $extra = false)
 	{
         $result = $this->escape_string($text);
@@ -241,7 +241,7 @@ class DB extends mysqli {
 
 		return $result;
 	}
-	
+
 	public function quote($text, $escape = true)
 	{
 		return '\'' . ($escape ? $this->escape($text) : $text) . '\'';
@@ -621,5 +621,17 @@ class DB extends mysqli {
 		$this->setQuery('SELECT FOUND_ROWS() AS count');
 		$count = $this->loadObject();
 		return $count->count;
+	}
+
+	/**
+	* Truncates the selected table
+	* @param $table
+	* @return $this
+	*/
+	public function truncate($table)
+	{
+		$this->setQuery('TRUNCATE TABLE '.$this->quoteName($table).';')->execute();
+
+		return $this;
 	}
 }
