@@ -34,8 +34,14 @@ class ControllerRest extends Controller
             }
         }
 
+        if(method_exists($model, 'getCode')){
+            if($code = $model->getCode()) {
+                http_response_code($code);
+            }
+        }
+
         header('Content-Type: text/javascript; charset=UTF-8');
-        
+
         if(!empty($jsonp)){
             echo $jsonp.'('.json_encode($data).')';
         } else {
