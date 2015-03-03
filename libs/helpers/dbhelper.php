@@ -58,4 +58,29 @@ class DBHelper
 
         return $db->loadObjectList();
     }
+
+    /**
+     * Deletes a specific record from the database
+     * @param String $table
+     * @param String $col
+     * @param String $value
+     * @param bool $like
+     * @param string $select
+     * @return mixed
+     * @throws Error
+     */
+    public static function delete($table, $col, $value, $like = false)
+    {
+        $db = App::getDBO();
+        if(!$db) return;
+
+        $equal = " = ";
+        if($like) $equal = " LIKE ";
+
+        $query = $db->getQuery(true);
+        $query->delete($table)->where($col.$equal.$db->quote($value));
+        $db->setQuery($query);
+
+        return $db->exec();
+    }
 }
