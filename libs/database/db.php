@@ -634,4 +634,35 @@ class DB extends mysqli {
 
 		return $this;
 	}
+
+	/**
+	* Duplicates a table
+	* @param $table
+	* @param $content
+	* @return $this
+	*/
+	public function duplicate($table, $content = true)
+	{
+		$date = date('Ymd_His');
+		$this->setQuery('CREATE TABLE '.$this->quoteName($table.'_'.$date).' LIKE '.$this->quoteName($table).';')->execute();
+
+		if($content){
+			$this->copy($table, $table.'_'.$date);
+		}
+
+		return $this;
+	}
+
+	/**
+	* Copy a table intro another
+	* @param $tableFrom
+	* @param $tableTo
+	* @return $this
+	*/
+	public function copy($tableFrom, $tableTo)
+	{
+		$this->setQuery('INSERT '.$this->quoteName($tableTo).' SELECT * FROM '.$this->quoteName($tableFrom).';')->execute();
+
+		return $this;
+	}
 }
