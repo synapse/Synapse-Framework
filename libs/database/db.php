@@ -191,16 +191,10 @@ class DB extends mysqli {
 		foreach (get_object_vars($object) as $k => $v)
 		{
 			// Only process non-null scalars.
-			if (is_array($v) or is_object($v) or $v === null)
-			{
-				continue;
-			}
+			if (is_array($v) or is_object($v) or $v === null) continue;
 
 			// Ignore any internal fields.
-			if ($k[0] == '_')
-			{
-				continue;
-			}
+			if ($k[0] == '_') continue;
 
 			// Prepare and sanitize the fields and values for the database query.
 			$fields[] = $this->quoteName($k);
@@ -216,21 +210,70 @@ class DB extends mysqli {
 		// Set the query and execute the insert.
 		$this->setQuery($query);
 
-		if (!$this->execute()){
-			return false;
-		}
+		if (!$this->execute()) return false;
 
 		// Update the primary key if it exists.
 		$id = $this->insertid();
 
-		if ($key && $id && is_string($key))
-		{
-			$object->$key = $id;
-		}
+		if ($key && $id && is_string($key)) $object->$key = $id;
 
 		return true;
 	}
 
+	/**
+	 * Inserts multiple rows into a table based on an array of object's properties.
+	 *
+	 * @param   string  $table    The name of the database table to insert into.
+	 * @param   object  $objects  An array of objects whose public properties match the table fields.
+	 *
+	 * @return  boolean    True on success.
+	 */
+	public function insertObjects($table, $objects)
+	{
+		if(!is_array($objects)) return false;
+		if(!count($objects)) return false;
+
+		$fields = array();
+
+		// Iterate over the object variables to build the query fields and values.
+		foreach (get_object_vars($objects[0]) as $k => $v)
+		{
+			// Only process non-null scalars.
+			if (is_array($v) or is_object($v) or $v === null) continue;
+
+			// Ignore any internal fields.
+			if ($k[0] == '_') continue;
+
+			// Prepare and sanitize the fields and values for the database query.
+			$fields[] = $this->quoteName($k);
+		}
+
+		// Create the base insert statement.
+		$query = $this->getQuery(true);
+		$query->insert($this->quoteName($table))
+				->columns($fields);
+
+		foreach ($objects as &$object) {
+
+			$values = array();
+
+			foreach (get_object_vars($object) as $k => $v){
+				// Only process non-null scalars.
+				if (is_array($v) or is_object($v) or $v === null) continue;
+				// Prepare and sanitize the fields and values for the database query.
+				$values[] = $this->quote($v);
+			}
+
+			$query->values(implode(',', $values));
+		}
+
+		// Set the query and execute the insert.
+		$this->setQuery($query);
+
+		if (!$this->execute()) return false;
+
+		return true;
+	}
 
 	public function escape($text, $extra = false)
 	{
