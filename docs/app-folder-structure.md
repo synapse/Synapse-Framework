@@ -1,4 +1,4 @@
-```
+``` txt
 - app
  |- config          - contains the routes and configuration file
  |- controllers     - controllers folder

@@ -112,7 +112,7 @@ class Route {
             $middleware = explode('.', $middleware);
 
             if(!is_array($middlewares) || (is_array($middlewares) && empty($middlewares[0]))){
-                throw new Error('Middlewares is baddly formated');
+                throw new Error( __('Middlewares is baddly formated') );
             }
 
             $middlewareObject = new stdClass();
