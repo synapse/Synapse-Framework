@@ -25,6 +25,6 @@
 	define('DEBUG', false);									// if true all errors and warnings will be printed and saved to the log file (LOGS)
 	define('DEBUG_LANGUAGE', false);    					// if true all translated string will be wrapped in **string_here**
 	define('LOG', false);									// if true all internal Log messages will be saved to DB via the Log Class
-	define('VERSION', '1.0');								// version number
+	define('VERSION', '1.0.2');								// version number
 
 ?>

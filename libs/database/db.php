@@ -25,6 +25,7 @@ class DB extends mysqli {
     public function __construct($options = array())
     {
         $this->connect($options['host'], $options['user'], $options['password'], $options['database'], $options['port']);
+		$this->set_charset("utf8");
     }
 
     public function __destruct()
