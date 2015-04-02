@@ -3,7 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage  Helpers/User
- * @ver 1.1.0
+ * @ver 1.1.1
  */
 
 defined('_INIT') or die;
@@ -62,7 +62,7 @@ class UserHelper
 
         $query->select($fields)
             ->from('#__users')
-            ->where($field.' = '.$db->quote($value));
+            ->where($db->quoteName($field) .' = '.$db->quote($value));
         $db->setQuery($query);
 
         if($first){
