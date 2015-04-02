@@ -3,7 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage  Helpers/User
- * @ver         1.0.1
+ * @ver 1.1.0
  */
 
 defined('_INIT') or die;
@@ -53,14 +53,14 @@ class UserHelper
      * @param String $value
      * @return bool|mixed
      */
-    public static function getByField($field, $value, $first = false)
+    public static function getByField($field, $value, $first = false, $fields = "*")
     {
         $db = App::getDBO();
         if(!$db) return;
-        
+
         $query = $db->getQuery(true);
 
-        $query->select('*')
+        $query->select($fields)
             ->from('#__users')
             ->where($field.' = '.$db->quote($value));
         $db->setQuery($query);
@@ -87,7 +87,7 @@ class UserHelper
 
         $db = App::getDBO();
         if(!$db) return;
-        
+
         $query = $db->getQuery(true);
 
         $query->select('*')
