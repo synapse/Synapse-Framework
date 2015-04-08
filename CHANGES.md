@@ -1,3 +1,8 @@
+#### 02.04.2015
+
+- added custom fields in UserHelper::getByField()
+- UserHelper::getByField() security bugfix
+
 
 #### 17.03.2015
 
