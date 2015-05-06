@@ -42,7 +42,7 @@ class Snippet extends Object {
     {
         $snippetClass = 'Snippet'.ucfirst($type);
         $snippetClassPath = LIBRARY.'/snippets/snippet'. strtolower($type).'.php';
-        if(!FS::exists($snippetClassPath)){
+        if(!File::exists($snippetClassPath)){
             return;
         }
 

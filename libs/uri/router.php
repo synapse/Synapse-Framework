@@ -12,15 +12,15 @@ defined('_INIT') or die;
  * version 1.0
  */
 class Router {
-    
+
     private $routes  = array();
     private $current = null;
-    
+
     public function __construct()
     {
-        
+
     }
-    
+
     /**
      * Add a GET route
      * @param String $segments
@@ -30,7 +30,7 @@ class Router {
     {
         return $this->map(array('GET'), $segments, $action, $middleware);
     }
-    
+
     /**
      * Add a POST route
      * @param String $segments
@@ -40,7 +40,7 @@ class Router {
     {
         return $this->map(array('POST'), $segments, $action, $middleware);
     }
-    
+
     /**
      * Add a PUT route
      * @param String $segments
@@ -50,7 +50,7 @@ class Router {
     {
         return $this->map(array('PUT'), $segments, $action, $middleware);
     }
-    
+
     /**
      * Add a DELETE route
      * @param String $segments
@@ -103,7 +103,7 @@ class Router {
     public function map($type, $segments, $action, $middleware = null)
     {
         $route = new Route();
-        
+
         $route->setUrl($segments)
               ->setMethods($type)
               ->setAction($action)
@@ -128,19 +128,19 @@ class Router {
     public function reorderRoutes()
     {
         $tmp = array();
-        
+
         foreach($this->routes as $route){
             $tmp[$route->getSegmentsCount()][] = $route;
         }
-        
+
         ksort($tmp);
-        
-        foreach($tmp as $k=>&$routes){        
-            usort($routes, function($a, $b){            
+
+        foreach($tmp as $k=>&$routes){
+            usort($routes, function($a, $b){
                 return $a->getTokensCount() > $b->getTokensCount();
             });
         }
-        
+
         $this->routes = array();
         foreach($tmp as $k=>&$routes){
             foreach($routes as $route){

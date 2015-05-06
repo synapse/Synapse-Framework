@@ -27,7 +27,7 @@ or adding multiple cascading middlewares:
 
 $router = $app->getRouter();
 
-$router->get('/', 'Main', array('MyLoginMiddleware', 'MyOtherMiddleware'));
+$router->get('/', 'Main', array('MyLogin', 'MyOther'));
 ```
 
 > If the method of the middleware is not specified then it will automatically presume there's a `index()` method and try to execute it
@@ -39,7 +39,7 @@ To execute a different method the middleware should be called like so:
 
 $router = $app->getRouter();
 
-$router->get('/', 'Main', 'MyLoginMiddleware.checkLogin');
+$router->get('/', 'Main', 'MyLogin.checkLogin');
 ```
 
 ***
@@ -57,4 +57,7 @@ Class NameMiddleware extends Middleware {
 		
 	}
 }
+
+// in the routes is called like so
+$router->get('/', 'Main', 'Name.someMethod');
 ```
