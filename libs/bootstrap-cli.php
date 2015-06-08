@@ -28,5 +28,3 @@ include(LIBRARY.'/functions.php');
 include(LIBRARY.'/loader.php');
 // register the class autoloader
 Loader::register();
-
-

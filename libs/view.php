@@ -76,7 +76,7 @@ class View extends Object {
         libxml_use_internal_errors(true);
         $dom->resolveExternals = true;
         $dom->substituteEntities = false;
-        $dom->loadHTML($view);
+        $dom->loadHTML($view, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         $includes = $dom->getElementsByTagName('include');
@@ -110,7 +110,7 @@ class View extends Object {
         if(!$this->template){
             throw new Error( __('Template is missing!') );
         }
-        
+
 		ob_start();
 
 		require($this->template);

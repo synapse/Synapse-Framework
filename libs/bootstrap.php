@@ -25,6 +25,12 @@ include(LIBRARY.'/loader.php');
 Loader::register();
 // get the first app instance
 $app = App::getInstance();
+// set the timezone and charset
+if(isset($app->getConfig()->timezone) && strlen($app->getConfig()->timezone))
+{
+	ini_set("date.timezone", $app->getConfig()->timezone);
+}
+ini_set('default_charset','utf-8');
 // include the routes
 include(ROUTES);
 // run the application

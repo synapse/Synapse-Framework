@@ -10,4 +10,7 @@ class Config
     public $db_name             = '';
     public $db_port             = '3306';
 	public $db_prefix           = 'pref_';
+
+    // Timezone
+    public $timezone            = 'Europe/Rome';
 }
