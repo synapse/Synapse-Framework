@@ -1,0 +1,39 @@
+body {
+	background-color: #EBEBE9;
+}
+
+#content {
+    margin-top: 40px;
+}
+
+.pad-none {
+	padding: 0 !important;
+}
+
+.pad-left-none {
+	padding-left: 0 !important;
+}
+
+.original-text {
+	float: left;
+	display: block;
+	width: 90%;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.translations {
+	float: left;
+	display: block;
+	width: 10%;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	text-align: right;
+}
+
+.translations small {
+	display: inline-block;
+	margin-right: 5px;
+}
