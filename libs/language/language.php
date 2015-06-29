@@ -9,7 +9,7 @@ defined('_INIT') or die;
 
 
 class Language {
-	
+
 	public static $instance		= null;
 
 	protected $language 		= null;
@@ -17,7 +17,7 @@ class Language {
 	protected $name				= null;
 	protected $strings 			= null;
 	protected $default			= null;
-	
+
 	public function __construct($lang = null)
 	{
         $this->strings = new stdClass();
@@ -124,7 +124,7 @@ class Language {
         // if no string options found
         if(count($args) == 1){
             $string = $args[0];
-            $stringHash = md5(strtolower($string));
+            $stringHash = md5($string);
             // no translation found -> return the original string
             if(!isset($language->$stringHash) || !isset($language->$stringHash->translations->$currentLanguage)){
                 return $string;
