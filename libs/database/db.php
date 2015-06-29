@@ -2,6 +2,7 @@
 /**
  * @package     Synapse
  * @subpackage  Database
+ * @version 1.1.2
  */
 
 defined('_INIT') or die;
@@ -291,6 +292,17 @@ class DB extends mysqli {
 		return '\'' . ($escape ? $this->escape($text) : $text) . '\'';
 	}
 
+	/**
+	 * Alias for $this->quote()
+	 * @param  String  $text String to quote.
+	 * @param  String  $escape Escape quoted string.
+	 * @return  String  quoted string.
+	 */
+	public function q($text, $escape = true)
+	{
+		return $this->quote($text, $escape);
+	}
+
     public function quoteName($name, $as = null)
 	{
 		if (is_string($name)){
@@ -321,6 +333,17 @@ class DB extends mysqli {
 
 			return $fin;
 		}
+	}
+
+	/**
+	 * Alias for $this->quoteName()
+	 * @param  String  $name Column name.
+	 * @param  String  $as Rename column as.
+	 * @return  String  quoted column name.
+	 */
+	public function qn($name, $as = null)
+	{
+		return $this->quoteName($name, $as);
 	}
 
     /**
