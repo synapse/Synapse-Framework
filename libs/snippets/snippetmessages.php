@@ -3,6 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage  Snippets/Messages
+ * @version     1.1
  */
 
 defined('_INIT') or die;
@@ -24,7 +25,7 @@ class SnippetMessages {
             libxml_use_internal_errors(true);
             $msgDocument->resolveExternals = true;
             $msgDocument->substituteEntities = false;
-            $msgDocument->loadHTML($messagesString);
+            $msgDocument->loadHTML('<?xml encoding="utf-8" ?>' .$messagesString);
             libxml_clear_errors();
             $msgNodes = $msgDocument->getElementsByTagName('body')->item(0)->childNodes;
 
