@@ -3,6 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage  Language
+ * @version 	1.1.1
  */
 
 defined('_INIT') or die;
@@ -140,7 +141,7 @@ class Language {
         }
 
         $string = array_shift($args);
-        $stringHash = md5(strtolower($string));
+        $stringHash = md5($string);
 
         $params = array();
         foreach($args as $index=>$value){
