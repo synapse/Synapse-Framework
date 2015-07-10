@@ -117,12 +117,12 @@ class UserHelper
         return $db->loadObjectList();
     }
 
-    public function update($user)
+    public function update($user, $idCol = 'id')
     {
         $db = App::getDBO();
         if(!$db) return;
 
-        if(!$db->updateObject('#__users', $user, 'id', true)){
+        if(!$db->updateObject('#__users', $user, $idCol, true)){
             return false;
         }
 
