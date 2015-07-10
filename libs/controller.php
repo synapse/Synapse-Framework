@@ -163,6 +163,8 @@ class Controller extends Object {
         $model = explode("/", $modelName);
         $modelClass  = ucfirst(array_pop($model)).'Model';
 
+        //TODO check if the model class exists before creating a new object
+
         return new $modelClass();
     }
 

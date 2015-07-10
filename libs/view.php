@@ -2,11 +2,12 @@
 
 /**
  * @package     Synapse
- * @subpackage  View
+ * @subpackage	View
+ * @version		1.0.2
  */
 
 defined('_INIT') or die;
-
+defined('LIBXML_HTML_NODEFDTD') || define ('LIBXML_HTML_NODEFDTD', 4);
 
 class View extends Object {
 

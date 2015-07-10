@@ -29,12 +29,12 @@ class App {
         }
         return self::$instance;
     }
-	
+
 	public static function getDBO()
 	{
         $config = self::getConfig();
         if(empty($config->db_host)) return null;
-        
+
         if(!self::$dbo){
             $options = array(
                 'host'      => self::getConfig()->db_host,
@@ -48,7 +48,7 @@ class App {
         }
         return self::$dbo;
 	}
-	
+
 	public static function getConfig()
 	{
         if(!self::$config){
@@ -56,7 +56,7 @@ class App {
         }
         return self::$config;
 	}
-	
+
 	public static function getSession()
 	{
         if(!self::$session){
@@ -64,7 +64,7 @@ class App {
         }
         return self::$session;
 	}
-	
+
 	public static function getLanguage()
 	{
         $session 	        = App::getSession();
@@ -114,7 +114,7 @@ class App {
         }
         return self::$request;
 	}
-	
+
 	public static function getRouter()
 	{
         if(!self::$router){
@@ -122,6 +122,35 @@ class App {
         }
         return self::$router;
 	}
+
+    /**
+    * Shortcut for Session::set()
+    */
+    public function setState($state, $value, $selfDestruct = false)
+    {
+        if(!is_string($state))
+        {
+            throw new Error( __('setState expects a string, {1} given', gettype($state)) );
+        }
+
+        $session = self::getSession();
+        $session->set($state, $value, $selfDestruct);
+
+        return $this;
+    }
+
+    /**
+    * Shortcut for Session::get()
+    */
+    public function getState($state)
+    {
+        if(!is_string($state))
+        {
+            throw new Error( __('setState expects a string, {1} given', gettype($state)) );
+        }
+        $session = self::getSession();
+        return $session->get($state);
+    }
 
     /**
     * Triggers and event and launches all plugins that are registered to this specific event
@@ -132,8 +161,15 @@ class App {
             include($pluginFile);
             $pluginFile = File::getName($pluginFile);
             $plugin     = ucfirst(File::stripExt($pluginFile)).'Plugin';
-            //TODO: check if the plugin class exists before calling the dispatch on it
-            //TODO: check if method dispatch exists before calling it
+
+            if(!class_exists($plugin)){
+                throw new Error( __('Plugin class not found!').' '.$plugin );
+            }
+
+            if(!method_exists($plugin, "dispatch")){
+                throw new Error( __('Plugin class method "dispatch()" not found in class "{2}"', $plugin), null );
+            }
+
             $plugin::dispatch($event, $params);
         }
     }
@@ -183,7 +219,7 @@ class App {
     public function run()
     {
         ob_start();
-		
+
         App::getRouter()->match();
 
         $contents = ob_get_contents();
