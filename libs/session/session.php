@@ -10,7 +10,7 @@ defined('_INIT') or die;
 class Session {
 
     public static $instance	= null;
-	
+
 	public function __construct()
 	{
 		$this->reload();
@@ -23,9 +23,23 @@ class Session {
         }
         return self::$instance;
     }
-	
+
+    /**
+    * Inserts a mixed variable in the specified Session key
+    * @param String $name
+    * @param Mixed $value
+    * @param Bool $selfDestruct
+    * @return Session
+    */
 	public function set($name, $value, $selfDestruct = false)
 	{
+        // if the value is a null delete the key
+        if($value === null)
+        {
+            unset($_SESSION[$name]);
+            return $this;
+        }
+
 		$_SESSION[$name] = $value;
 
         if($selfDestruct){
@@ -41,7 +55,12 @@ class Session {
         $this->reload();
         return $this;
 	}
-	
+
+    /**
+    * Retrieves a mixed value from the Session for a specific key
+    * @param String $name
+    * @return Mixed
+    */
 	public function get($name)
 	{
 		if(isset($_SESSION[$name])){
@@ -60,12 +79,12 @@ class Session {
 		}
 		return null;
 	}
-	
+
 	public function getAll()
 	{
 		return $_SESSION;
 	}
-	
+
 	public function remove($name)
 	{
 		if(isset($_SESSION[$name])){
@@ -73,7 +92,7 @@ class Session {
 		}
         return $this;
 	}
-	
+
 	public function removeAll()
 	{
 		session_unset();
