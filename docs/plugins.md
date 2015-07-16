@@ -1,4 +1,4 @@
-Plugins are actions called by a given event. Every plugin should contain a list of events to whom it responds and the relative method to execute when the given event is fired. 
+Plugins are actions called by a given event. Every plugin should contain a list of events to whom it responds and the relative method to execute when the given event is fired.
 
 > There can be more then one plugin that responds to the same event name
 
@@ -21,7 +21,7 @@ class MypluginPlugin extends Plugin {
 
 	public static function someMethod(&$param1, &$param2, &$param3)
 	{
-                
+
 	}
 }
 ```

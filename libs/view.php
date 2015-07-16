@@ -3,7 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage	View
- * @version		1.0.2
+ * @version		1.0.3
  */
 
 defined('_INIT') or die;
@@ -72,8 +72,10 @@ class View extends Object {
     protected function addIncludes(&$view, $data)
     {
         if(empty($view)) return;
+		// convert html to UTF-8
+		$view = mb_convert_encoding($view, 'HTML-ENTITIES', "UTF-8");
 
-        $dom = new DOMDocument();
+        $dom = new DOMDocument("1.0", "utf-8");
         libxml_use_internal_errors(true);
         $dom->resolveExternals = true;
         $dom->substituteEntities = false;
