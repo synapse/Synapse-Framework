@@ -16,6 +16,16 @@ class FieldType {
         $this->field = $field;
     }
 
+    public function render()
+    {
+        return '';
+    }
+
+    protected function getField()
+    {
+        return $this->field;
+    }
+
     public function validate()
     {
         return true;

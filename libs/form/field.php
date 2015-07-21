@@ -9,104 +9,74 @@ defined('_INIT') or die;
 
 class Field extends FormElement {
 
-    protected $name         = null;
-    protected $label        = null;
     protected $type         = null;
-    protected $filter       = null;
     protected $value        = null;
     protected $form         = null;
     protected $default      = null;
+    protected $options      = null;
     protected $message      = null;
-    protected $validations  = array();
-    protected $options      = array();
-    protected $fieldsPaths  = array();
+    protected $filter       = null;
+    protected $validators   = array();
 
-    public function __construct($options = array())
+
+    public function __construct($type = null)
     {
-        $this->attributes   = new stdClass();
-        $this->options      = new stdClass();
-        $this->fieldsPaths  = array(APP.'/forms/', LIBRARY.'/form/');
-
-        if(array_key_exists('attributes', $options) && (is_array($options['attributes']) || is_object($options['attributes']))){
-            $attributes = (object)$options['attributes'];
-            $this->setAttributes($attributes);
+        if($type === null)
+        {
+            throw new Error('Field type not specified');
         }
 
-        if(array_key_exists('options', $options) && (is_array($options['options']) || is_object($options['options']))){
-            $options['options'] = (object)$options['options'];
-            $this->setOptions($options['options']);
+        if(!is_string($type))
+        {
+            throw new Error('Field type expects a string, '.gettype($type).' given');
         }
 
-        if(array_key_exists('name', $options) && is_string($options['name'])){
-            $this->setName($options['name']);
+        $fieldsPaths  = array(APP.'/form/fields/', LIBRARY.'/form/fields/');
+
+        $hasType = false;
+        foreach($fieldsPaths as $path){
+
+            $path = Path::clean($path.$type.'.php');
+
+            if(File::exists($path)){
+                require_once($path);
+
+                $typeClass  = ucfirst($type).'FieldType';
+
+                if(!class_exists($typeClass)){
+                    throw new Error( __('Field type class not found!').' '.$typeClass );
+                }
+
+                $fieldType = new $typeClass($this);
+
+                if(!method_exists($typeClass, 'render')){
+                    throw new Error( __('Field type class method "render()" not found in class "{1}"', $typeClass), null );
+                }
+
+                $this->type = $fieldType;
+                $hasType = true;
+
+                break;
+            }
         }
 
-        if(array_key_exists('label', $options) && is_string($options['label'])){
-            $this->setLabel($options['label']);
+        if(!$hasType)
+        {
+            throw new Error( __('Field type "{1}" not found. Please make sure that the type specified has a corresponding class', $type), null );
         }
 
-        if(array_key_exists('type', $options) && is_string($options['type'])){
-            $this->setType($options['type']);
-        }
-
-        if(array_key_exists('filter', $options) && is_string($options['filter'])){
-            $this->setFilter($options['filter']);
-        }
-
-        if(array_key_exists('message', $options) && is_string($options['message'])){
-            $this->setMessage($options['message']);
-        }
-
-        if(array_key_exists('validate', $options) && is_array($options['validate']) && count($options['validate'])){
-            $this->setValidations($options['validate']);
-        }
-
-        if(array_key_exists('default', $options)){
-            $this->setDefault($options['default']);
-        }
-
-        if(array_key_exists('value', $options)){
-            $this->setValue($options['value']);
-        }
-
-        if(array_key_exists('form', $options) && get_class($options['form']) == 'Form'){
-            $this->setForm($options['form']);
-        }
-
-        return $this;
+        $this->options = new stdClass();
     }
-
 
     public function setName($name)
     {
-        if(!is_string($name)){
-            throw new Error('setName expects a string, '.gettype($name).' given');
-        }
-
-        $this->name = $name;
-
+        $this->setAttribute('name', $name);
         return $this;
     }
 
     public function getName()
     {
-        return $this->name;
-    }
-
-    public function setLabel($label)
-    {
-        if(!is_string($label)){
-            throw new Error('setLabel expects a string, '.gettype($label).' given');
-        }
-
-        $this->label = $label;
-
-        return $this;
-    }
-
-    public function getLabel()
-    {
-        return $this->label;
+        return $this->getAttribute('name');
     }
 
     public function setValue($value)
@@ -129,41 +99,6 @@ class Field extends FormElement {
         return $this->default;
     }
 
-    public function setType($type)
-    {
-        if(!is_string($type)){
-            throw new Error('setType expects a string, '.gettype($type).' given');
-        }
-
-        //$this->type = $type;
-
-        foreach($this->getIncludePaths() as $path){
-            $path = Path::clean($path.'/fields/'.$type.'.php');
-
-            if(File::exists($path)){
-                require_once($path);
-
-                $typeClass  = ucfirst($type).'FieldType';
-
-                if(!class_exists($typeClass)){
-                    throw new Error( __('Field type class not found!').' '.$typeClass );
-                }
-
-                $fieldType = new $typeClass($this);
-
-                if(!method_exists($typeClass, 'render')){
-                    throw new Error( __('Field type class method "render()" not found in class "{1}"', $typeClass), null );
-                }
-
-                $this->type = $fieldType;
-
-                break;
-            }
-        }
-
-        return $this;
-    }
-
     public function getType()
     {
         return $this->type;
@@ -176,43 +111,91 @@ class Field extends FormElement {
         }
 
         $this->filter = $filter;
+        return $this;
+    }
+
+    public function getFilter()
+    {
+        return $this->filter;
+    }
+
+    /**
+     * Passed the fields value trough a filtering process
+     * param Bool $return
+     */
+    public function filter($return = false)
+    {
+        if(!$this->getValue() && !$this->getFilter()) return $this;
+
+        $value = $this->getValue();
+
+        switch ($this->getFilter()) {
+            case 'integer':
+                $this->setValue( StringFilter::clean($value, 'integer') );
+                break;
+            case 'unsigned':
+                $this->setValue( StringFilter::clean($value, 'uint') );
+                break;
+            case 'double':
+            case 'float':
+                $this->setValue( StringFilter::clean($value, 'float') );
+                break;
+            case 'bool':
+            case 'boolean':
+                $this->setValue( StringFilter::clean($value, 'boolean') );
+                break;
+            case 'word':
+                $this->setValue( StringFilter::clean($value, 'word') );
+                break;
+
+            /* MORE TO BE ADDED */
+
+            default:
+                $this->setValue( StringFilter::clean($value, 'raw') );
+                break;
+        }
+
+        if($return)
+        {
+            return $this->getValue();
+        }
 
         return $this;
     }
 
-    public function setValidations($validations = array())
+    public function setValidators($validators = array())
     {
-        if(!is_array($validations)){
-            throw new Error('setValidations expects an array, '.gettype($validations).' given');
+        if(!is_array($validators)){
+            throw new Error('setValidators expects an array, '.gettype($validators).' given');
         }
 
-        foreach($validations as $validation){
-            $this->setValidation($validation);
+        foreach($validators as $validator){
+            $this->setValidator($validator);
         }
 
         return $this;
     }
 
-    public function setValidation($validation)
+    public function setValidator($validator)
     {
-        if(!is_array($validation) && !is_object($validation)){
-            throw new Error('setValidations expects an array or object, '.gettype($validation).' given');
+        if(!is_array($validator) && !is_object($validator)){
+            throw new Error( __('setValidator expects an array or object, {1} given', gettype($validator)) );
         }
 
-        $validation = (object)$validation;
+        $validator = (object)$validator;
 
-        if(!property_exists($validation, 'type')){
-            throw new Error('Validation must have a type');
+        if(!property_exists($validator, 'type')){
+            throw new Error( __('Validator must have a type') );
         }
 
-        $this->validations[] = $validation;
+        $this->validators[] = $validator;
 
         return $this;
     }
 
-    public function getValidations()
+    public function getValidators()
     {
-        return $this->validations;
+        return $this->validators;
     }
 
     public function setMessage($message)
@@ -234,7 +217,7 @@ class Field extends FormElement {
     public function setForm($form)
     {
         if(get_class($form) != 'Form'){
-            throw new Error('setForm require an object of type Form, '.gettype($form).' received instead.');
+            throw new Error(__('setForm require an object of type Form, {1} received instead.', gettype($form)));
         }
 
         $this->form = $form;
@@ -254,7 +237,6 @@ class Field extends FormElement {
         $this->options = (object)$options;
         return $this;
     }
-
 
     public function getOptions()
     {
@@ -277,29 +259,22 @@ class Field extends FormElement {
         return property_exists($this->options, $name);
     }
 
-    public function addIncludePath($path)
-    {
-        if(!Folder::exists($path)){
-            throw new Error('Include path not found');
-        }
-
-        array_unshift($this->fieldsPaths, $path);
-
-        return $this;
-    }
-
-    public function getIncludePaths()
-    {
-        return $this->fieldsPaths;
-    }
-
     public function validate()
     {
         // check required value
         $value = $this->getValue();
         $message = $this->getMessage();
 
-        if($this->hasAttribute('required') && $this->getAttribute('required') === true && empty($value)){
+        if(
+            $this->hasAttribute('required') &&
+            (
+                $this->getAttribute('required') === true ||
+                $this->getAttribute('required') === 'true' ||
+                $this->getAttribute('required') === 1 ||
+                $this->getAttribute('required') === '1'
+            ) &&
+            empty($value)
+        ){
             if($message && !empty($message)) {
                 $this->setError( __($message) );
             } else {
@@ -309,52 +284,58 @@ class Field extends FormElement {
 
 
         // check field type validation
-        if($this->getType()){
-            if(!$this->getType()->validate()){
-                if($message && !empty($message)) {
-                    $this->setError( __($message) );
-                } else {
-                    $this->setError( __("Invalid field value") );
-                }
+
+        if(!$this->getType()->validate()){
+            if($message && !empty($message)) {
+                $this->setError( __($message) );
+            } else {
+                $this->setError( __("Invalid field value") );
             }
         }
 
+        if(count($this->getValidators()))
+        {
+            $foundValidators = false;
 
-        // if there are not extra validations or if the value is empty
-        // return OK
-        if(!count($this->getValidations())){
-            return true;
-        }
+            foreach($this->getValidators() as $validator)
+            {
+                $validationPaths  = array(APP.'/form/validators/', LIBRARY.'/form/validators/');
 
+                foreach($validationPaths as $path)
+                {
+                    $path = Path::clean($path . $validator->type . '.php');
 
-        foreach($this->getValidations() as $validate){
+                    if(File::exists($path))
+                    {
+                        require_once($path);
 
-            foreach($this->getIncludePaths() as $path) {
-                $path = Path::clean($path . '/validations/' . $validate->type . '.php');
-                if(File::exists($path)){
-                    require_once($path);
+                        $validatorClass = ucfirst($validator->type).'FieldValidator';
 
-                    $validateClass = ucfirst($validate->type).'FieldValidate';
-
-                    if(!class_exists($validateClass)){
-                        throw new Error( __('Field validation class not found!').' '.$validateClass );
-                    }
-
-                    if(!method_exists($validateClass, 'test')){
-                        throw new Error( __('Field validation class method "text()" not found in class "{1}"', $validateClass), null );
-                    }
-
-                    if(!$validateClass::test($this->getValue(), $this, $validate)){
-                        if(isset($validate->message) && !empty($validate->message)){
-                            $this->setError( __($validate->message) );
-                        } else {
-                            $this->setError( __("Invalid field value") );
+                        if(!class_exists($validatorClass))
+                        {
+                            throw new Error( __('Field validator class not found!').' '.$validatorClass );
                         }
-                    }
 
+                        if(!method_exists($validatorClass, 'test'))
+                        {
+                            throw new Error( __('Field validation class method "test()" not found in class "{1}"', $validatorClass), null );
+                        }
+
+                        if(!$validatorClass::test($this->getValue(), $this, $validator))
+                        {
+                            if(isset($validator->message) && !empty($validator->message))
+                            {
+                                $this->setError( __($validator->message) );
+                            }
+                            else
+                            {
+                                $this->setError( __("Invalid field value") );
+                            }
+                        }
+
+                    }
                 }
             }
-
         }
 
         if(count($this->getErrors())) return false;
@@ -364,29 +345,6 @@ class Field extends FormElement {
 
     public function render()
     {
-        if(!$this->getType()){
-            throw new Error('Missing field type');
-        }
-
-        if(!$this->getName()){
-            throw new Error('Missing field name');
-        }
-
         return $this->getType()->render();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

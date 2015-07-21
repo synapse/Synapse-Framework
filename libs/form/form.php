@@ -10,10 +10,9 @@ defined('_INIT') or die;
 class Form extends FormElement {
 
     protected $path         = null;
+    protected $fields       = array();
+    protected $table        = null;
     protected $fieldsets    = array();
-    protected $data         = array();
-    protected $template     = "<form {{attributes}}>{{fieldsets}}</form>";
-
 
     /**
      * Initialize the Form object with a JSON file
@@ -21,42 +20,137 @@ class Form extends FormElement {
      */
     public function __construct($path = null)
     {
-        $this->attributes = new stdClass();
+        parent::__construct();
 
         // generate the form from a JSON file
         if($path) {
-            $this->path = $path;
-
-            if (!File::exists($path)) {
-                throw new Error('Form not found at path: ' . $path);
-            }
+            $this->setPath($path);
             $this->load();
         }
+    }
+
+    public function setPath($path)
+    {
+        if(!is_string($path)){
+            throw new Error('setPath expects a string as the value, '.gettype($value).' given');
+        }
+
+        $this->path = $path;
+        return $this;
     }
 
     /**
      * Loads the content of the JSON file at the given path
      */
-    protected function load()
+    public function load()
     {
+        if(!$this->path)
+        {
+            throw new Error('Form path not set');
+        }
+
+        if (!File::exists($this->path))
+        {
+            throw new Error('Form not found at path: ' . $path);
+        }
+
         $json = file_get_contents($this->path);
-        $obj = json_decode($json);
+        $form = json_decode($json);
 
         if(json_last_error()){
             throw new Error('The JSON file provided is not valid');
         }
 
-        if(isset($obj->attributes) && is_object($obj->attributes)){
-             $this->setAttributes($obj->attributes);
+        if(isset($form->attributes)){
+            $this->setAttributes($form->attributes);
         }
 
-        if(isset($obj->template)){
-            $this->setTemplate($obj->template);
+        if(isset($form->fields) && is_array($form->fields) && count($form->fields)){
+            $this->loadFields($form->fields);
         }
 
-        if(isset($obj->fieldsets) && is_array($obj->fieldsets) && count($obj->fieldsets)){
-            $this->loadFieldsets($obj->fieldsets);
+        if(isset($form->fieldsets) && is_array($form->fieldsets) && count($form->fieldsets)){
+            $this->loadFieldsets($form->fieldsets);
         }
+    }
+
+    protected function loadFields($fields)
+    {
+        foreach ($fields as $fieldOptions) {
+            $field = new Field($fieldOptions->type);
+
+            if(isset($fieldOptions->attributes))
+            {
+                $field->setAttributes($fieldOptions->attributes);
+            }
+
+            if(isset($fieldOptions->options))
+            {
+                $field->setOptions($fieldOptions->options);
+            }
+
+            if(isset($fieldOptions->value))
+            {
+                $field->setValue($fieldOptions->value);
+            }
+
+            if(isset($fieldOptions->default))
+            {
+                $field->setDefault($fieldOptions->default);
+            }
+
+            if(isset($fieldOptions->message))
+            {
+                $field->setMessage($fieldOptions->message);
+            }
+
+            if(isset($fieldOptions->filter))
+            {
+                $field->setFilter($fieldOptions->filter);
+            }
+
+            $field->setForm($this);
+
+            $this->addField($field);
+        }
+    }
+
+    public function addFields($fields = array())
+    {
+
+    }
+
+    public function addField($field)
+    {
+        if(get_class($field) !== 'Field')
+        {
+            throw new Error(__('addField expects a Field object, {1} given', get_class($field)));
+        }
+
+        $this->fields[] = $field;
+    }
+
+    /**
+     * Returns all the forms fields
+     */
+    public function getFields()
+    {
+        return $this->fields;
+    }
+
+    /**
+     * Returns a single field based on its attribute value
+     */
+    public function getField($name, $attribute = 'name')
+    {
+        foreach ($this->getFields() as $field) {
+            if($field->getAttribute($attribute) == $name)
+            {
+                return $field;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -66,13 +160,12 @@ class Form extends FormElement {
     protected function loadFieldsets($fieldsets)
     {
         foreach($fieldsets as $fieldset){
-            $newFieldset = new Fieldset((array)$fieldset);
-            $newFieldset->setForm($this);
+            //$newFieldset = new Fieldset((array)$fieldset);
+            //$newFieldset->setForm($this);
 
-            $this->addFieldset($newFieldset);
+            //$this->addFieldset($newFieldset);
         }
     }
-
 
     /**
      * Add a fieldset to the form collection
@@ -80,6 +173,7 @@ class Form extends FormElement {
      * @return $this
      * @throws Error
      */
+     /*
     public function addFieldset($fieldset)
     {
         if(get_class($fieldset) != 'Fieldset'){
@@ -90,7 +184,7 @@ class Form extends FormElement {
 
         return $this;
     }
-
+    */
 
     /**
      * Sets the name attribute of the form
@@ -99,7 +193,7 @@ class Form extends FormElement {
      */
     public function setName($name)
     {
-        $this->attributes->name = $name;
+        $this->setAttribute('name', $name);
         return $this;
     }
 
@@ -108,7 +202,7 @@ class Form extends FormElement {
      */
     public function getName()
     {
-        return $this->attributes->name;
+        return $this->getAttribute('name');
     }
 
 
@@ -119,7 +213,7 @@ class Form extends FormElement {
      */
     public function setAction($action)
     {
-        $this->attributes->action = $action;
+        $this->setAttribute('action', $action);
         return $this;
     }
 
@@ -128,7 +222,7 @@ class Form extends FormElement {
      */
     public function getAction()
     {
-        return $this->attributes->action;
+        return $this->getAttribute('action');
     }
 
 
@@ -139,7 +233,7 @@ class Form extends FormElement {
      */
     public function setMethod($method)
     {
-        $this->attributes->method = $method;
+        $this->setAttribute('method', $method);
         return $this;
     }
 
@@ -148,7 +242,7 @@ class Form extends FormElement {
      */
     public function getMethod()
     {
-        return $this->attributes->method;
+        return $this->getAttribute('method');
     }
 
     /**
@@ -158,7 +252,7 @@ class Form extends FormElement {
      */
     public function setEnctype($encoding)
     {
-        $this->attributes->enctype = $encoding;
+        $this->setAttribute('enctype', $encoding);
         return $this;
     }
 
@@ -168,7 +262,7 @@ class Form extends FormElement {
      */
     public function getEnctype()
     {
-        return $this->attributes->enctype;
+        return $this->getAttribute('enctype');
     }
 
     /**
@@ -178,9 +272,9 @@ class Form extends FormElement {
     {
         $errors = array();
 
-        foreach($this->getFieldsets() as $fieldset){
-            if(!$fieldset->validate()){
-                $errors[] = $fieldset->getErrors();
+        foreach($this->getFields() as $field){
+            if(!$field->validate()){
+                $errors[] = $field->getErrors();
             }
         }
 
@@ -192,7 +286,6 @@ class Form extends FormElement {
         return true;
     }
 
-
     /**
      * Sets the form fields values
      * @param Array $data
@@ -202,7 +295,7 @@ class Form extends FormElement {
     public function setData($data = array())
     {
         if(!is_array($data) && !is_object($data)){
-            throw new Error('setData expects an object or an array, '.gettype($data).' given');
+            throw new Error(__('setData expects an object or an array, {1} given', gettype($data)));
         }
 
         $data = (array)$data;
@@ -216,75 +309,98 @@ class Form extends FormElement {
         return $this;
     }
 
-
     /**
      * Returns the form fields values
      * @return Array
      */
     public function getData()
     {
-        return $this->data;
-    }
+        $data = array();
 
+        foreach ($this->getFields() as $field) {
+            if($field->hasAttribute('name'))
+            {
+                $data[$field->getAttribute('name')] = $field->getValue();
+            }
+        }
+
+        return $data;
+    }
 
     /**
-     * Sets the value of a given form field by name
+     * Sets the value of a given form field by a given attribute, by default is name
      * @param String $name
      * @param Mixed $value
+     * @param String $attribute
      * @return $this
      */
-    public function setFieldValue($name, $value)
+    public function setFieldValue($name, $value, $attribute = 'name')
     {
-        foreach($this->fieldsets as $fieldset){
-            $fieldset->setFieldValue($name, $value);
+        $field = $this->getField($name, $attribute);
+
+        if($field)
+        {
+            $field->setValue($value);
         }
+
         return $this;
     }
-
 
     /**
      * Returns the fields value
      * @param String $name
+     * @param String $attribute
      * @return Mixed
      */
-    public function getFieldValue($name)
+    public function getFieldValue($name, $attribute = 'name')
     {
-        foreach($this->getFieldsets() as $fieldset){
-            if($fieldset->hasField($name)){
-                return $fieldset->getFieldValue($name);
-            }
+        $field = $this->getField($name, $attribute);
+
+        if($field)
+        {
+            return $field->getValue();
         }
 
         return null;
     }
 
-
-    /**
-     * Returns the list of fieldsets
-     * @return array
-     */
-    public function getFieldsets()
+    public function filter()
     {
-        return $this->fieldsets;
+        foreach ($this->getFields() as $field) {
+            $field->filter();
+        }
+
+        return $this;
     }
 
-
-    /**
-     * Return the list of Fieldsets
-     * @param String $name
-     * @return Array
-     */
-    public function getFieldset($name)
+    public function setTable($table)
     {
-        return $this->fieldsets[$name];
+        if(!is_string($table)){
+            throw new Error('setTable expects a string as the value, '.gettype($table).' given');
+        }
+
+        $this->table = $table;
+        return $this;
     }
 
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    public function save()
+    {
+        $db = $this->getDBO();
+
+    }
 
     /**
      * Renders and returns the form in html
      */
     public function render()
     {
+
+        /*
         $template = $this->getTemplate();
 
         $template = str_replace("{{attributes}}", $this->getAttributes(true), $template);
@@ -302,6 +418,31 @@ class Form extends FormElement {
         }
 
         return $template;
+        */
+
+        $html = array();
+        $html[] = '<form';
+
+        if($this->getAttributes())
+        {
+            foreach ($this->getAttributes() as $attrName => $attrValue) {
+                $html[] = ' '.$attrName.'="'.$attrValue.'"';
+            }
+        }
+
+        $html[] = '>';
+
+        ob_start();
+
+        foreach ($this->getFields() as $field) {
+            $html[] = $field->render();
+        }
+
+        $html[] = '</form>';
+
+        echo implode("", $html);
+
+        return ob_get_clean();
     }
 
     public function __toString()

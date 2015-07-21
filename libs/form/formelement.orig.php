@@ -12,7 +12,7 @@ class FormElement {
 
     protected $attributes   = null;
     protected $errors       = array();
-    //protected $template     = "";
+    protected $template     = "";
 
     public function __construct()
     {
@@ -28,12 +28,7 @@ class FormElement {
     public function setAttributes($attributes)
     {
         if(!is_array($attributes) && !is_object($attributes)){
-            throw new Error(__('setAttributes expects an object or an array, {1} given', gettype($attributes)));
-        }
-
-        if(is_array($attributes) && array_keys($attributes) === range(0, count($attributes) - 1))
-        {
-            throw new Error(__('setAttributes expects an associative array, sequential array given'));
+            throw new Error('setAttributes expects an object or an array, '.gettype($attributes).' given');
         }
 
         // TODO check the types of every item passed
@@ -48,7 +43,7 @@ class FormElement {
     public function getAttributes($toString = false)
     {
         if($toString){
-            if(count(get_object_vars($this->attributes))){
+            if($this->attributes){
                 $attributes = array();
                 foreach($this->attributes as $attribute=>$value){
 
@@ -65,8 +60,6 @@ class FormElement {
             return '';
         }
 
-
-
         return $this->attributes;
     }
 
@@ -77,8 +70,12 @@ class FormElement {
      */
     public function setAttribute($name, $value)
     {
-        if(!is_string($value)){
-            throw new Error(__('setAttribute expects a string as the value, {1} given', gettype($value)));
+        if(is_string($value) && $value === 'true'){
+            $value = true;
+        }
+
+        if(is_string($value) && $value === 'false'){
+            $value = false;
         }
 
         $this->attributes->$name = $value;
@@ -88,27 +85,17 @@ class FormElement {
     /**
      * Returns a specific form attribute
      * @param String $name
-     * @param Boolean $toString
-     * @param Boolean $translate
      * @return mixed
      */
-    public function getAttribute($name, $toString = false, $translate = false)
+    public function getAttribute($name, $toString = false)
     {
-        if(!$this->hasAttribute($name)) return null;
+        if(!property_exists($this, $name)) return null;
 
-        $attribute = (string)$this->attributes->$name;
-
-        if($translate)
-        {
-            $attribute = __($attribute);
+        if($toString){
+            return $name.'="'.(string)$this->attributes->$name.'"';
         }
 
-        if($toString)
-        {
-            return $name.'="'.$attribute.'"';
-        }
-
-        return $attribute;
+        return $this->attributes->$name;
     }
 
     /**
@@ -118,7 +105,6 @@ class FormElement {
      */
     public function hasAttribute($name)
     {
-        if(!$this->attributes) return false;
         return property_exists($this->attributes, $name);
     }
 
@@ -126,7 +112,6 @@ class FormElement {
      * Sets the html template splitted in an array
      * @param Array $template
      */
-     /*
     public function setTemplate($template)
     {
         if(!is_string($template)){
@@ -136,13 +121,11 @@ class FormElement {
         $this->template = $template;
         return $this;
     }
-    */
 
     /**
      * Loads a form template from a file
      * @param String $path
      */
-     /*
     public function loadTemplate($path)
     {
         if(!File::exists($path)){
@@ -152,18 +135,15 @@ class FormElement {
         $template = file_get_contents($path);
         $this->setTemplate($template);
     }
-    */
 
     /**
      * Return the html template
      * @return string
      */
-     /*
     public function getTemplate()
     {
         return $this->template;
     }
-    */
 
     public function setError($error)
     {

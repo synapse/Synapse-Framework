@@ -6,7 +6,7 @@ Class MainController extends Controller {
 	{
 		$model = $this->getModel('main');
 		$helloString = $model->sayHello();
-		
+
 		$this->getView()
 			->setTemplate('main')
 			->setData($helloString, 'hello')

@@ -14,6 +14,68 @@ class ListFieldType extends FieldType
     {
         $html = array();
 
+        $html[] = '<div class="form-group">';
+
+        if($this->getField()->hasOption('label'))
+        {
+            $html[] = '<label';
+
+            if($this->getField()->hasAttribute('id'))
+            {
+                $html[] = ' for="'.$this->getField()->getAttribute('id').'"';
+            }
+
+            $html[] = '>';
+            $html[] = __($this->getField()->getOption('label'));
+            $html[] = '</label>';
+        }
+        $html[] = '<select class="form-control"';
+
+        if(count($this->getField()->getAttributes()))
+        {
+            foreach ($this->getField()->getAttributes() as $attrName => $attrValue) {
+
+                if(in_array($attrName, array('placeholder')))
+                {
+                    $attrValue = __($attrValue);
+                }
+
+                $html[] = ' '.$attrName.'="'.$attrValue.'"';
+            }
+        }
+
+        $html[] = '>';
+
+        if($this->getField()->hasOption('items') && count($this->getField()->getOption('items')))
+        {
+            foreach ($this->getField()->getOption('items') as $item) {
+                $html[] = '<option value="'.$item->text.'">'.$item->text.'</option>';
+            }
+        }
+
+        /*
+        if($this->getField()->getValue())
+        {
+            $html[] = ' value="'.$this->getField()->getValue().'"';
+        }
+        else if($this->getField()->getDefault())
+        {
+            $html[] = ' value="'.$this->getField()->getDefault().'"';
+        }
+        */
+
+        $html[] = '</select>';
+
+        $html[] = '</div>';
+
+        return implode("", $html);
+    }
+
+    /*
+    public function render()
+    {
+        $html = array();
+
         $html[] = '<div>';
         $labelClass = $this->field->getOption('labelclass');
         $labelClass = !empty($labelClass) ? 'class="'.$labelClass.'"' : '';
@@ -111,5 +173,5 @@ class ListFieldType extends FieldType
 
         return $valid;
     }
-
+    */
 }
