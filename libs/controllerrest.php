@@ -3,6 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage  Controller/Rest
+ * @version     1.0.1
  */
 
 defined('_INIT') or die;
@@ -15,7 +16,7 @@ class ControllerRest extends Controller
      * @param String $method
      * @param Array $params
      */
-    protected function render($model, $method, $params, $jsonp = false, $callback = null)
+    protected function render($model, $method, $params = array(), $jsonp = false, $callback = null)
     {
         $data   = new stdClass();
         $object = call_user_func_array(array($model, $method), $params);
