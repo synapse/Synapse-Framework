@@ -1,7 +1,12 @@
 <?php
 
-defined('_INIT') or die;
+/**
+ * @package     Synapse
+ * @subpackage  FileSystem/File
+ * @ver         1.1
+ */
 
+defined('_INIT') or die;
 
 class File
 {
@@ -122,62 +127,25 @@ class File
 	 * @param   mixed  $file  The file name or an array of file names
 	 * @return  boolean  True on success
 	 */
-    /*
 	public static function delete($file)
 	{
-		$FTPOptions = JClientHelper::getCredentials('ftp');
-
-		if (is_array($file))
-		{
-			$files = $file;
-		}
-		else
-		{
-			$files[] = $file;
-		}
-
-		// Do NOT use ftp if it is not enabled
-		if ($FTPOptions['enabled'] == 1)
-		{
-			// Connect the FTP client
-			$ftp = JClientFtp::getInstance($FTPOptions['host'], $FTPOptions['port'], array(), $FTPOptions['user'], $FTPOptions['pass']);
-		}
-
+		$files = (array) $file;
 		foreach ($files as $file)
 		{
-			$file = JPath::clean($file);
-
+			$file = Path::clean($file);
 			// Try making the file writable first. If it's read-only, it can't be deleted
 			// on Windows, even if the parent folder is writable
 			@chmod($file, 0777);
-
 			// In case of restricted permissions we zap it one way or the other
 			// as long as the owner is either the webserver or the ftp
-			if (@unlink($file))
-			{
-				// Do nothing
-			}
-			elseif ($FTPOptions['enabled'] == 1)
-			{
-				$file = JPath::clean(str_replace(JPATH_ROOT, $FTPOptions['root'], $file), '/');
-				if (!$ftp->delete($file))
-				{
-					// FTP connector throws an error
-
-					return false;
-				}
-			}
-			else
+			if (!@ unlink($file))
 			{
 				$filename = basename($file);
-				JLog::add(JText::sprintf('JLIB_FILESYSTEM_DELETE_FAILED', $filename), JLog::WARNING, 'jerror');
-				return false;
+				throw new Error( __('Failed deleting: "{1}"', $filename), null );
 			}
 		}
-
 		return true;
 	}
-    */
 
 	/**
 	 * Moves a file

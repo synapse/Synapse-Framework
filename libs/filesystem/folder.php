@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @package     Synapse
+ * @subpackage  FileSystem/Folder
+ * @ver         1.1
+ */
+
 defined('_INIT') or die;
 
 abstract class Folder
@@ -143,20 +149,6 @@ abstract class Folder
 	public static function create($path, $mode = 0755)
 	{
 		return mkdir($path, $mode, true);
-	}
-
-	/**
-	 * Delete a folder.
-	 *
-	 * @param   string  $path  The path to the folder to delete.
-	 *
-	 * @return  boolean  True on success.
-	 *
-	 * @since   11.1
-	 */
-	public static function delete($path)
-	{
-		return rmdir($path);
 	}
 
 	/**
@@ -311,7 +303,6 @@ abstract class Folder
 		// Is the path a folder?
 		if (!is_dir($path))
 		{
-			//JLog::add(JText::sprintf('JLIB_FILESYSTEM_ERROR_PATH_IS_NOT_A_FOLDER_FOLDER', $path), JLog::WARNING, 'jerror');
 			throw new Error( __('The path given is not a folder: "{1}"', $path), null );
 			return false;
 		}
@@ -445,16 +436,85 @@ abstract class Folder
 
 	/**
 	 * Makes path name safe to use.
-	 *
 	 * @param   string  $path  The full path to sanitise.
-	 *
 	 * @return  string  The sanitised string.
-	 *
-	 * @since   11.1
 	 */
 	public static function makeSafe($path)
 	{
 		$regex = array('#[^A-Za-z0-9:_\\\/-]#');
 		return preg_replace($regex, '', $path);
+	}
+
+	/**
+	 * Delete a folder.
+	 * @param   string  $path  The path to the folder to delete.
+	 * @return  boolean  True on success.
+	 */
+	public static function delete($path)
+	{
+		@set_time_limit(ini_get('max_execution_time'));
+		// Sanity check
+		if (!$path)
+		{
+			// Bad programmer! Bad Bad programmer!
+			return false;
+		}
+
+		try
+		{
+			// Check to make sure the path valid and clean
+			$path = Path::clean($path);
+		}
+		catch (Exception $e)
+		{
+			throw new Error( __('The path given is not a valid path: "{1}"', $path), null );
+		}
+
+		// Is this really a folder?
+		if (!is_dir($path))
+		{
+			throw new Error( __('Path is not a folder: "{1}"', $path), null );
+		}
+
+		// Remove all the files in folder if they exist; disable all filtering
+		$files = self::files($path, '.', false, true, array(), array());
+		if (!empty($files))
+		{
+			if (File::delete($files) !== true)
+			{
+				// File::delete throws an error
+				return false;
+			}
+		}
+
+		// Remove sub-folders of folder; disable all filtering
+		$folders = self::folders($path, '.', false, true, array(), array());
+		foreach ($folders as $folder)
+		{
+			if (is_link($folder))
+			{
+				// Don't descend into linked directories, just delete the link.
+				if (File::delete($folder) !== true)
+				{
+					// File::delete throws an error
+					return false;
+				}
+			}
+			elseif (self::delete($folder) !== true)
+			{
+				// Folder::delete throws an error
+				return false;
+			}
+		}
+		// In case of restricted permissions we zap it one way or the other
+		// as long as the owner is either the webserver or the ftp.
+		if (@rmdir($path))
+		{
+			return true;
+		}
+		else
+		{
+			throw new Error( __('Could not delete folder: "{1}"', $path), null );
+		}
 	}
 }
