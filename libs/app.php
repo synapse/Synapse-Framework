@@ -3,6 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage  App
+ * @version     1.2
  */
 
 defined('_INIT') or die;
@@ -155,7 +156,7 @@ class App {
     /**
     * Triggers and event and launches all plugins that are registered to this specific event
     */
-    public function trigger($event, $params = array())
+    public static function trigger($event, $params = array())
     {
         foreach(glob(PLUGINS."/*.php") as $pluginFile){
             include($pluginFile);

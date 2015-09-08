@@ -10,6 +10,7 @@ Plugins are actions called by a given event. Every plugin should contain a list 
 
 ### Creating a plugin
 To create a plugin create a php file inside the 'plugins' folder in your app folder.
+
 ```php
 <?php defined('_INIT') or die;
 
