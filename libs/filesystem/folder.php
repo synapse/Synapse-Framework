@@ -3,7 +3,7 @@
 /**
  * @package     Synapse
  * @subpackage  FileSystem/Folder
- * @ver         1.1
+ * @ver         1.2
  */
 
 defined('_INIT') or die;
@@ -299,14 +299,12 @@ abstract class Folder
 	{
 		// Check to make sure the path valid and clean
 		$path = Path::clean($path);
-
 		// Is the path a folder?
 		if (!is_dir($path))
 		{
 			throw new Error( __('The path given is not a folder: "{1}"', $path), null );
 			return false;
 		}
-
 		// Compute the excludefilter string
 		if (count($excludefilter))
 		{
@@ -316,10 +314,8 @@ abstract class Folder
 		{
 			$excludefilter_string = '';
 		}
-
 		// Get the folders
 		$arr = self::_items($path, $filter, $recurse, $full, $exclude, $excludefilter_string, false);
-
 		// Sort the folders
 		asort($arr);
 		return array_values($arr);
@@ -343,15 +339,12 @@ abstract class Folder
 	protected static function _items($path, $filter, $recurse, $full, $exclude, $excludefilter_string, $findfiles)
 	{
 		@set_time_limit(ini_get('max_execution_time'));
-
 		$arr = array();
-
 		// Read the source directory
 		if (!($handle = @opendir($path)))
 		{
 			return $arr;
 		}
-
 		while (($file = readdir($handle)) !== false)
 		{
 			if ($file != '.' && $file != '..' && !in_array($file, $exclude)
@@ -359,10 +352,8 @@ abstract class Folder
 			{
 				// Compute the fullpath
 				$fullpath = $path . '/' . $file;
-
 				// Compute the isDir flag
 				$isDir = is_dir($fullpath);
-
 				if (($isDir xor $findfiles) && preg_match("/$filter/", $file))
 				{
 					// (fullpath is dir and folders are searched or fullpath is not dir and files are searched) and file matches the filter
