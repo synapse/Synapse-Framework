@@ -10,7 +10,15 @@ defined('_INIT') or die;
 
 class JWT extends Object
 {
-    public $methods = array(
+
+    /**
+     * When checking nbf, iat or expiration times,
+     * we want to provide some extra leeway time to
+     * account for clock skew.
+     */
+    public static $leeway = 0;
+
+    public static $supported_algs = array(
         'HS256' => array('hash_hmac', 'SHA256'),
         'HS512' => array('hash_hmac', 'SHA512'),
         'HS384' => array('hash_hmac', 'SHA384'),
@@ -20,16 +28,16 @@ class JWT extends Object
     /**
      * Decodes a JWT string into a PHP object.
      *
-     * @param string      $jwt       The JWT
-     * @param string|Array|null $key The secret key, or map of keys
-     * @param bool        $verify    Don't skip verification process
+     * @param string      $jwt           The JWT
+     * @param string|Array|null $key     The secret key, or map of keys
+     * @param Array       $allowed_algs  List of supported verification algorithms
      *
-     * @return object|False      The JWT's payload as a PHP object
+     * @return object      The JWT's payload as a PHP object
      *
      * @uses jsonDecode
      * @uses urlsafeB64Decode
      */
-    public function decode($jwt, $key = null, $verify = true)
+    public function decode($jwt, $key = null, $allowed_algs = array())
     {
         $tks = explode('.', $jwt);
         if (count($tks) != 3) {
@@ -37,27 +45,29 @@ class JWT extends Object
             return false;
         }
         list($headb64, $bodyb64, $cryptob64) = $tks;
-
-        $header = $this->jsonDecode($this->urlsafeB64Decode($headb64));
-        if (null === $header || false === $header) {
-            $this->setError( __('Invalid header encoding') );
+        if (null === ($header = $this->jsonDecode($this->urlsafeB64Decode($headb64)))) {
+            $this->setError(__('Invalid header encoding'));
             return false;
         }
-
-        $payload = $this->jsonDecode($this->urlsafeB64Decode($bodyb64));
-        if (null === $payload || false === $payload) {
-            $this->setError( __('Invalid claims encoding') );
+        if (null === $payload = $this->jsonDecode($this->urlsafeB64Decode($bodyb64))) {
+            $this->setError(__('Invalid claims encoding'));
             return false;
         }
-
         $sig = $this->urlsafeB64Decode($cryptob64);
-        if ($verify) {
+        if (isset($key)) {
             if (empty($header->alg)) {
                 $this->setError( __('Empty algorithm') );
                 return false;
-
             }
-            if (is_array($key)) {
+            if (empty(self::$supported_algs[$header->alg])) {
+                $this->setError(__('Algorithm not supported'));
+                return false;
+            }
+            if (!is_array($allowed_algs) || !in_array($header->alg, $allowed_algs)) {
+                $this->setError(__('Algorithm not allowed'));
+                return false;
+            }
+            if (is_array($key) || $key instanceof \ArrayAccess) {
                 if (isset($header->kid)) {
                     $key = $key[$header->kid];
                 } else {
@@ -74,7 +84,7 @@ class JWT extends Object
 
             // Check if the nbf if it is defined. This is the time that the
             // token can actually be used. If it's not yet that time, abort.
-            if (isset($payload->nbf) && $payload->nbf > time()) {
+            if (isset($payload->nbf) && $payload->nbf > (time() + self::$leeway)) {
                 $this->setError( __('Cannot handle token prior to {1}', date(DateTime::ISO8601, $payload->nbf)) );
                 return false;
             }
@@ -82,13 +92,13 @@ class JWT extends Object
             // Check that this token has been created before 'now'. This prevents
             // using tokens that have been created for later use (and haven't
             // correctly used the nbf claim).
-            if (isset($payload->iat) && $payload->iat > time()) {
+            if (isset($payload->iat) && $payload->iat > (time() + self::$leeway)) {
                 $this->setError( __('Cannot handle token prior to {1}', date(DateTime::ISO8601, $payload->iat)) );
                 return false;
             }
 
             // Check if this token has expired.
-            if (isset($payload->exp) && time() >= $payload->exp) {
+            if (isset($payload->exp) && (time() - self::$leeway) >= $payload->exp) {
                 $this->setError( __('Expired token') );
                 return false;
             }
@@ -102,34 +112,29 @@ class JWT extends Object
      *
      * @param object|array $payload PHP object or array
      * @param string       $key     The secret key
-     * @param string       $algo    The signing algorithm. Supported
+     * @param string       $alg     The signing algorithm. Supported
      *                              algorithms are 'HS256', 'HS384' and 'HS512'
+     * @param array        $head    An array with header elements to attach
      *
      * @return string      A signed JWT
      * @uses jsonEncode
      * @uses urlsafeB64Encode
      */
-    public function encode($payload, $key, $algo = 'HS256', $keyId = null)
+    public function encode($payload, $key, $alg = 'HS256', $keyId = null, $head = null)
     {
-        $header = array('typ' => 'JWT', 'alg' => $algo);
+        $header = array('typ' => 'JWT', 'alg' => $alg);
         if ($keyId !== null) {
             $header['kid'] = $keyId;
         }
+        if ( isset($head) && is_array($head) ) {
+            $header = array_merge($head, $header);
+        }
         $segments = array();
-
-        $encodedHeader = $this->jsonEncode($header);
-        if($encodedHeader === false) return false;
-        $segments[] = $this->urlsafeB64Encode($encodedHeader);
-
-        $encodedPayload = $this->jsonEncode($payload);
-        if($encodedPayload === false) return false;
-        $segments[] = $this->urlsafeB64Encode($encodedPayload);
-
+        $segments[] = $this->urlsafeB64Encode($this->jsonEncode($header));
+        $segments[] = $this->urlsafeB64Encode($this->jsonEncode($payload));
         $signing_input = implode('.', $segments);
 
-        $signature = $this->sign($signing_input, $key, $algo);
-        if($signature === false) return false;
-
+        $signature = $this->sign($signing_input, $key, $alg);
         $segments[] = $this->urlsafeB64Encode($signature);
 
         return implode('.', $segments);
@@ -140,27 +145,27 @@ class JWT extends Object
      *
      * @param string $msg          The message to sign
      * @param string|resource $key The secret key
-     * @param string $method       The signing algorithm. Supported algorithms
+     * @param string $alg       The signing algorithm. Supported algorithms
      *                               are 'HS256', 'HS384', 'HS512' and 'RS256'
      *
-     * @return string|false          An encrypted message
+     * @return string          An encrypted message
      */
-    public function sign($msg, $key, $method = 'HS256')
+    public function sign($msg, $key, $alg = 'HS256')
     {
-        if (empty($this->methods[$method])) {
-            $this->setError( __('Algorithm not supported') );
+        if (empty(self::$supported_algs[$alg])) {
+            $this->setError('Algorithm not supported');
             return false;
         }
-
-        list($function, $algo) = $this->methods[$method];
+        list($function, $algorithm) = self::$supported_algs[$alg];
         switch($function) {
             case 'hash_hmac':
-                return hash_hmac($algo, $msg, $key, true);
+                return hash_hmac($algorithm, $msg, $key, true);
             case 'openssl':
                 $signature = '';
-                $success = openssl_sign($msg, $signature, $key, $algo);
+                $success = openssl_sign($msg, $signature, $key, $algorithm);
                 if (!$success) {
-                    throw new DomainException("OpenSSL unable to sign data");
+                    $this->setError("OpenSSL unable to sign data");
+                    return false;
                 } else {
                     return $signature;
                 }
@@ -173,20 +178,20 @@ class JWT extends Object
      * @param string $msg the original message
      * @param string $signature
      * @param string|resource $key for HS*, a string key works. for RS*, must be a resource of an openssl public key
-     * @param string $method
-     * @return bool|false
+     * @param string $alg
+     * @return bool
      */
-    public function verify($msg, $signature, $key, $method = 'HS256')
+    private function verify($msg, $signature, $key, $alg)
     {
-        if (empty($this->methods[$method])) {
-            $this->setError( __('Algorithm not supported') );
+        if (empty(self::$supported_algs[$alg])) {
+            $this->setError('Algorithm not supported');
             return false;
         }
 
-        list($function, $algo) = $this->methods[$method];
+        list($function, $algorithm) = self::$supported_algs[$alg];
         switch($function) {
             case 'openssl':
-                $success = openssl_verify($msg, $signature, $key, $algo);
+                $success = openssl_verify($msg, $signature, $key, $algorithm);
                 if (!$success) {
                     $this->setError( __('OpenSSL unable to verify data: {1}', openssl_error_string()) );
                     return false;
@@ -195,14 +200,17 @@ class JWT extends Object
                 }
             case 'hash_hmac':
             default:
-                $hash = hash_hmac($algo, $msg, $key, true);
-                $len = min(strlen($signature), strlen($hash));
+                $hash = hash_hmac($algorithm, $msg, $key, true);
+                if (function_exists('hash_equals')) {
+                    return hash_equals($signature, $hash);
+                }
+                $len = min(self::safeStrlen($signature), self::safeStrlen($hash));
 
                 $status = 0;
                 for ($i = 0; $i < $len; $i++) {
                     $status |= (ord($signature[$i]) ^ ord($hash[$i]));
                 }
-                $status |= (strlen($signature) ^ strlen($hash));
+                $status |= (self::safeStrlen($signature) ^ self::safeStrlen($hash));
 
                 return ($status === 0);
         }
@@ -310,5 +318,19 @@ class JWT extends Object
         $this->setError( isset($messages[$errno]) ? $messages[$errno] : __('Unknown JSON error: {1}', $errno)  );
         return false;
 
+    }
+
+    /**
+     * Get the number of bytes in cryptographic strings.
+     *
+     * @param string
+     * @return int
+     */
+    private static function safeStrlen($str)
+    {
+        if (function_exists('mb_strlen')) {
+            return mb_strlen($str, '8bit');
+        }
+        return strlen($str);
     }
 }
