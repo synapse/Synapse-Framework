@@ -13,4 +13,7 @@ class Config
 
     // Timezone
     public $timezone            = 'Europe/Rome';
+
+    // Directives
+    public $directives          = array();
 }

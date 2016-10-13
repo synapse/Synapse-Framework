@@ -10,33 +10,14 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 	</head>
 	<body>
-		<!-- <h1><?= $hello ?></h1> -->
-		<!-- DELETE FROM HERE -->
+		<h1><?= $hello ?></h1>
 
-		<?php
-			$form = new Form(APP.'/form/forms/myform.json');
+		<div>
+			<decorate template="hello/world">
+				test
+			</decorate>
 
-			$field = new Field("text");
-			$field->setValue("cristian.barlutiu @gmail.com");
-			$field->setValidator(array("type" => "email", "message" => "It must be a valid email address"));
-
-			echo '<pre>';
-			var_dump($field->validate());
-			echo '</pre>';
-
-			echo '<pre>';
-			print_r($field->getErrors());
-			echo '</pre>';
-
-			$form->addField($field);
-
-			echo '<pre>';
-			print_r($form);
-			echo '</pre>';
-
-			echo $form->render();
-		?>
-
-		<!-- TO HERE -->
+			<include />
+		</div>
 	</body>
 </html>

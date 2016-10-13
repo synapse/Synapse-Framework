@@ -8,7 +8,7 @@ Class MainController extends Controller {
 		$helloString = $model->sayHello();
 
 		$this->getView()
-			->setTemplate('main')
+			->setTemplate(array('main'))
 			->setData($helloString, 'hello')
 			->render();
 	}

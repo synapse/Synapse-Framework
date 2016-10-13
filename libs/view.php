@@ -11,9 +11,10 @@ defined('LIBXML_HTML_NODEFDTD') || define ('LIBXML_HTML_NODEFDTD', 4);
 
 class View extends Object {
 
-	private $template       = null;
+    private $templates      = array();
     private $_data          = array();
     private $templatePath   = null;
+    private $directives     = array('include', 'decorate');
 
 	public function __construct($path = null)
 	{
@@ -24,17 +25,29 @@ class View extends Object {
 
     /**
      * Set the html template for the view
-     * @param $template
+     * @param String|Array $template
      * @return $this
      */
     public function setTemplate($template)
     {
-        $this->template = $this->templatePath .'/'. $template .'.php';
+        $paths = array();
 
-        if(!file_exists($this->template)){
-            throw new Error( __('Template file not found!').' '.$this->template );
+        if(is_array($template)) {
+            $paths = array_merge($paths, $template);
+        } else {
+            $paths[] = $template;
         }
+        
+        foreach($paths as $path)
+        {
+            $path = $this->templatePath .'/'. $path .'.php';
+            if(!file_exists($path)){
+                throw new Error( __('Template file not found!').' '.$path );
+            }
 
+            $this->templates[] = $path;
+        }
+                
         return $this;
     }
 
@@ -82,18 +95,58 @@ class View extends Object {
         $dom->loadHTML($view, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
+        $config = App::getConfig();
+
+        if(isset($config->directives) && is_array($config->directives))
+        {
+            $this->directives = array_merge($this->directives, $config->directives); 
+        }
+
+        foreach($this->directives as $directiveName)
+        {
+            // check if the directive class exists
+            $directiveName = strtolower($directiveName);
+            $directiveFileName = $directiveName.'.php';
+            $directiveAppPath = DIRECTIVES.'/'.$directiveFileName;
+            $directiveLibPath = LIBRARY.'/directives/'.$directiveFileName;
+            $directivePath = null;
+
+            if(file_exists($directiveAppPath)){
+                $directivePath = $directiveAppPath;
+            } else if (file_exists($directiveLibPath)){
+                $directivePath = $directiveLibPath;
+            } else {
+                throw new Error( __('Directive file not found: {1}', $directiveFileName), null );
+            }
+
+            require_once($directivePath);
+
+            $directiveSegments = explode("/", $directiveName);
+            $directiveTag = array_pop($directiveSegments);
+            $directiveClass  = ucfirst($directiveTag).'Directive';
+
+            if(!class_exists($directiveClass)){
+                throw new Error( __('Directive class not found!').' '.$directiveClass );
+            }
+
+            $directive = new $directiveClass($dom, $directiveTag);
+            $directive->expand();
+        }
+
+        /*
         $includes = $dom->getElementsByTagName('include');
 
         foreach($includes as $include){
             $attr = $include->attributes;
             $type = $attr->getNamedItem('type')->nodeValue;
 
-            Snippet::render($type, $include, $dom, $data);
+            //Snippet::render($type, $include, $dom, $data);
         }
 
         for($i = $includes->length - 1; $i >= 0; $i--){
             $includes->item($i)->parentNode->removeChild($includes->item($i));
         }
+        */
 
         $view = $dom->saveHTML();
     }
@@ -110,13 +163,17 @@ class View extends Object {
             extract($_data);
         }
 
-        if(!$this->template){
-            throw new Error( __('Template is missing!') );
+        if(!count($this->templates)){
+            throw new Error( __('Templates not defined!') );
         }
 
 		ob_start();
 
-		require($this->template);
+        foreach($this->templates as $template)
+        {
+            require($template);
+        }
+
 		$view = ob_get_clean();
 
         $this->addIncludes($view, $this->_data);

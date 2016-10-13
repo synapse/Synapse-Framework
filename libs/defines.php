@@ -20,6 +20,7 @@
     define('PLUGINS', APP.'/plugins');                      // plugins folder used to launch events handlers
     define('CONFIG', APP.'/config/config.php');		        // configuration file
     define('ROUTES', APP.'/config/routes.php');		        // routes file
+    define('DIRECTIVES', APP.'/directives');                // app directives
 
     /* Options */
 	define('DEBUG', false);									// if true all errors and warnings will be printed and saved to the log file (LOGS)

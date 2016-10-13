@@ -24,7 +24,8 @@ class Middleware extends Controller {
      */
     protected function getSibling($middlewareName)
     {
-        $middlewareFileName = strtolower($middlewareName).'.php';
+        $middlewareName = strtolower($middlewareName);
+        $middlewareFileName = $middlewareName.'.php';
         $middlewarePath = MIDDLEWARES.'/'.$middlewareFileName;
 
 
