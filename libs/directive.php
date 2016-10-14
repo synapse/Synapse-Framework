@@ -11,12 +11,22 @@ class Directive extends Object {
     
     protected $attributes = array();
     protected $_dom = null;
-    protected $_tag = ''; 
+    protected $_tag = null; 
+    protected $_data = null;
 
-    public function __construct(&$dom, $tag)
+    public function __construct(&$dom, &$tag, $data)
     {
         $this->_dom = $dom;
         $this->_tag = $tag;
+        $this->_data = $data;
+
+        $attributes = $tag->attributes;
+
+        // for every predefined attribute
+        foreach($this->attributes as $attr)
+        {
+            $this->$attr = $attributes->getNamedItem($attr)->nodeValue;
+        }
     }
 
     public function getAttributes() 
@@ -24,25 +34,13 @@ class Directive extends Object {
         return $this->attributes;
     }
 
+    protected function getData()
+    {
+        return $this->_data;
+    }
+
     public function expand()
     {
-        // check the DOM for the requested directive
-        $directivesDOM = $this->_dom->getElementsByTagName($this->_tag);
-
-        // check if there's at least one directive with the current name
-        if($directivesDOM->length)
-        {
-            // for every copy of the same directive inside the DOM
-            foreach($directivesDOM as $directiveDOM)
-            {
-                $attributes = $directiveDOM->attributes;
-                
-                // for every predefined attribute
-                foreach($this->attributes as $attr)
-                {
-                    $this->$attr = $attributes->getNamedItem($attr)->nodeValue;
-                }
-            }
-        }
+        
     }
 }

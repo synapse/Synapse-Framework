@@ -13,11 +13,8 @@
 		<h1><?= $hello ?></h1>
 
 		<div>
-			<decorate template="hello/world">
-				test
-			</decorate>
-
-			<include />
+			<include template="include" />
+			<include template="include2" text="hello" />
 		</div>
 	</body>
 </html>

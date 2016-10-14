@@ -129,24 +129,26 @@ class View extends Object {
                 throw new Error( __('Directive class not found!').' '.$directiveClass );
             }
 
-            $directive = new $directiveClass($dom, $directiveTag);
-            $directive->expand();
+            // check the DOM for the requested directive
+            $directivesDOM = $dom->getElementsByTagName($directiveTag);
+
+            // check if there's at least one directive with the current name
+            if($directivesDOM->length)
+            {
+                // for every copy of the same directive inside the DOM
+                foreach($directivesDOM as $directiveDOM)
+                {
+                    $directive = new $directiveClass($dom, $directiveDOM, $data);
+                    $directive->expand();
+                }
+
+                // clean
+                for($i = $directivesDOM->length - 1; $i >= 0; $i--)
+                {
+                    $directivesDOM->item($i)->parentNode->removeChild($directivesDOM->item($i));
+                }
+            }
         }
-
-        /*
-        $includes = $dom->getElementsByTagName('include');
-
-        foreach($includes as $include){
-            $attr = $include->attributes;
-            $type = $attr->getNamedItem('type')->nodeValue;
-
-            //Snippet::render($type, $include, $dom, $data);
-        }
-
-        for($i = $includes->length - 1; $i >= 0; $i--){
-            $includes->item($i)->parentNode->removeChild($includes->item($i));
-        }
-        */
 
         $view = $dom->saveHTML();
     }
