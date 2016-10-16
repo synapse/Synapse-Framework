@@ -14,7 +14,6 @@
 
 		<div>
 			<include template="include" />
-			<include template="include2" text="hello" />
 		</div>
 	</body>
 </html>

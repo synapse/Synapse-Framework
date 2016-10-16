@@ -102,6 +102,7 @@ class View extends Object {
             $this->directives = array_merge($this->directives, $config->directives); 
         }
 
+        // check if directive class exists and include it
         foreach($this->directives as $directiveName)
         {
             // check if the directive class exists
@@ -128,26 +129,35 @@ class View extends Object {
             if(!class_exists($directiveClass)){
                 throw new Error( __('Directive class not found!').' '.$directiveClass );
             }
+        }
 
-            // check the DOM for the requested directive
-            $directivesDOM = $dom->getElementsByTagName($directiveTag);
-
-            // check if there's at least one directive with the current name
-            if($directivesDOM->length)
+        $search = true;
+        while($search)
+        {
+            $counter = 0;
+            // for each directive
+            foreach($this->directives as $directiveName)
             {
-                // for every copy of the same directive inside the DOM
-                foreach($directivesDOM as $directiveDOM)
-                {
-                    $directive = new $directiveClass($dom, $directiveDOM, $data);
-                    $directive->expand();
-                }
+                // check the DOM for the requested directive
+                $directivesDOM = $dom->getElementsByTagName($directiveName);
+                $directiveClass  = ucfirst($directiveName).'Directive';
 
-                // clean
-                for($i = $directivesDOM->length - 1; $i >= 0; $i--)
-                {
-                    $directivesDOM->item($i)->parentNode->removeChild($directivesDOM->item($i));
+                // check if there's at least one directive with the current name
+                if($directivesDOM->length){
+                    // expand and clean
+                    for($i = $directivesDOM->length - 1; $i >= 0; $i--)
+                    {
+                        $directiveDOM = $directivesDOM->item($i); 
+                        $directive = new $directiveClass($dom, $directiveDOM, $data);
+                        $directive->expand();
+                        // $directivesDOM->item($i)->parentNode->removeChild($directivesDOM->item($i));
+                        $directivesDOM->item($i)->parentNode->removeChild($directiveDOM);
+                    }
+
+                    $counter++;
                 }
             }
+            if(!$counter) $search = false;
         }
 
         $view = $dom->saveHTML();
