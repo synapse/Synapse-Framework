@@ -10,15 +10,9 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 	</head>
 	<body>
-		<h1><?= $hello ?></h1>
-
-		<div>
-			<!--<include template="include" />-->
-
-			<decorate template="decorator">
-				<h1>1. Hello decorator</h1>
-				<h1>2. Hello decorator</h1>
-			</decorate>
-		</div>
+		<decorate template="decorator">
+			<h1>1. Hello decorator</h1>
+			<h1>2. Hello decorator</h1>
+		</decorate>
 	</body>
 </html>

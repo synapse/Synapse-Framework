@@ -29,20 +29,21 @@ class DecorateDirective extends Directive {
         
         foreach($nodes as $node) {
             $snippet = $this->_dom->importNode($node, true);
-
             $replaceTags = $snippet->getElementsByTagName('replace'); 
-            
             
             if($replaceTags->length)
             {
                 $replaceTag = $replaceTags->item(0);
-                $a =  $this->_tag->nodeValues();
-                foreach($this->_tag->childNodes as $child)
-                {                    
-                //     $replaceTag->parentNode->insertBefore($child, $replaceTag);
+
+                $nb = $this->_tag->childNodes->length;
+                for($pos=0; $pos < $nb; $pos++)
+                {   
+                    $child = $this->_tag->childNodes->item($pos);
+                    if($child) $snippet->insertBefore($child, $replaceTag);
                 }
 
-                // $replaceTag->parentNode->removeChild($replaceTag);
+                // remove the replace tag
+                $replaceTag->parentNode->removeChild($replaceTag);
             }
 
             $this->_tag->parentNode->insertBefore($snippet, $this->_tag);   
