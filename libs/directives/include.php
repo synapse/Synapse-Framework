@@ -39,7 +39,6 @@ class IncludeDirective extends Directive {
             $snippet = $this->_dom->importNode($node, true);   
             $this->_tag->parentNode->insertBefore($snippet, $this->_tag);   
         }
-        
     }
 
 }

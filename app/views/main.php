@@ -13,7 +13,12 @@
 		<h1><?= $hello ?></h1>
 
 		<div>
-			<include template="include" />
+			<!--<include template="include" />-->
+
+			<decorate template="decorator">
+				<h1>1. Hello decorator</h1>
+				<h1>2. Hello decorator</h1>
+			</decorate>
 		</div>
 	</body>
 </html>
