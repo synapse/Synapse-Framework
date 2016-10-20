@@ -2,3 +2,5 @@
 *.orig
 
 .htaccess
+/libs/view copy.php
+/libs/directives/decorate copy.php
