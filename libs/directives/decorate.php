@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @package     Synapse
  * @subpackage	Directives/Decorate
@@ -8,6 +7,7 @@
 
 class DecorateDirective extends Directive {
     
+    protected $container = true;
     protected $attributes = array(
         'template' => true
     );

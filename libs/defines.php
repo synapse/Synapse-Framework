@@ -14,7 +14,6 @@
 	define('MIDDLEWARES', APP.'/middlewares');				// app models
 	define('MODULES', APP.'/modules');      				// app modules
 	define('VIEWS', APP.'/views');							// app views
-	define('SNIPPETS', APP.'/snippets');					// app snippets
 	define('FORMS', APP.'/forms');							// app forms, templates, fields and validations
     define('CACHE', APP.'/cache');							// cache folder used for garbage
     define('PLUGINS', APP.'/plugins');                      // plugins folder used to launch events handlers

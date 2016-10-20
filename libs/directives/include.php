@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @package     Synapse
  * @subpackage	Directives/Include
@@ -8,6 +7,7 @@
 
 class IncludeDirective extends Directive {
     
+    protected $container = false;
     protected $attributes = array(
         'template' => true
     );
@@ -24,7 +24,7 @@ class IncludeDirective extends Directive {
 
         $this->replaceTag($html);
 
-        return $this->view;
+        return $this->getView();
     }
 
 }

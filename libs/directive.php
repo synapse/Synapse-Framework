@@ -9,22 +9,15 @@
 
 class Directive extends Object {
     
+    protected $container = false;
     protected $attributes = array();
     protected $_view = null;
     protected $_tag = null; 
     protected $_content = null;
     protected $_data = null;
 
-    public function __construct($view = null, $tag = null, $content = null, $data = null)
+    public function __construct()
     {
-        if($view) $this->_view = $view;
-        if($tag) 
-        {
-            $this->setTag($tag);
-        }
-        if($content) $this->_content = $content;
-        if($data) $this->_data = $data;
-
         return $this;
     }
 
@@ -94,6 +87,20 @@ class Directive extends Object {
     {
         $this->_data = $data;
         return $this;
+    }
+
+    public function reset()
+    {
+        $this->_view = null;
+        $this->_tag = null; 
+        $this->_content = null;
+        $this->_data = null;
+        return $this;
+    }
+
+    public function isContainer()
+    {
+        return $this->container;
     }
 
     public function expand()

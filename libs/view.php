@@ -14,10 +14,7 @@ class View extends Object {
     private $templates      = array();
     private $_data          = array();
     private $templatePath   = null;
-    private $directives     = array(
-                                "include" => false, 
-                                "decorate" => true
-                            );
+    private $directives     = array("include", "decorate", "messages");
 
 	public function __construct($path = null)
 	{
@@ -101,7 +98,7 @@ class View extends Object {
         }
 
         // check if directive class exists and include it
-        foreach($this->directives as $directiveName => $container)
+        foreach($this->directives as $directiveName)
         {
             // check if the directive class exists
             $directiveName = strtolower($directiveName);
@@ -134,8 +131,13 @@ class View extends Object {
         {
             $counter = 0;
             // for each directive
-            foreach($this->directives as $directiveName => $container)
+            foreach($this->directives as $directiveName)
             {
+                $directiveClass = ucfirst($directiveName).'Directive';
+                $directive = NULL;
+                $directive = new $directiveClass();
+                $container = $directive->isContainer();
+
                 $pattern = $container ? ('/<'.$directiveName.'[^>]*>(.*?)<\\/'.$directiveName.'>/si') : ('/<'.$directiveName.'[^>]*>/si');  
                 preg_match_all($pattern, $view, $directivesList);
 
@@ -143,8 +145,9 @@ class View extends Object {
                 if(count($directivesList[0])){
                     for($i = count($directivesList[0]) - 1; $i >= 0; $i--)
                     {
-                        $directive = new $directiveClass($view);
-                        $directive->setData($data);
+                        $directive->reset()
+                            ->setView($view)
+                            ->setData($data);
                         
                         if($container) {
                             $directive->setTag($directivesList[0][$i])
