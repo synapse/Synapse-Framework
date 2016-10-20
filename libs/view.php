@@ -14,7 +14,10 @@ class View extends Object {
     private $templates      = array();
     private $_data          = array();
     private $templatePath   = null;
-    private $directives     = array('include', 'decorate');
+    private $directives     = array(
+                                "include" => false, 
+                                "decorate" => true
+                            );
 
 	public function __construct($path = null)
 	{
@@ -88,12 +91,7 @@ class View extends Object {
 		// convert html to UTF-8
 		$view = mb_convert_encoding($view, 'HTML-ENTITIES', "UTF-8");
 
-        $dom = new DOMDocument("1.0", "utf-8");
-        libxml_use_internal_errors(true);
-        $dom->resolveExternals = true;
-        $dom->substituteEntities = false;
-        $dom->loadHTML($view, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-        libxml_clear_errors();
+        
 
         $config = App::getConfig();
 
@@ -103,7 +101,7 @@ class View extends Object {
         }
 
         // check if directive class exists and include it
-        foreach($this->directives as $directiveName)
+        foreach($this->directives as $directiveName => $container)
         {
             // check if the directive class exists
             $directiveName = strtolower($directiveName);
@@ -131,36 +129,38 @@ class View extends Object {
             }
         }
 
-        $search = true;
-        while($search)
+        $searching = true;
+        while($searching)
         {
             $counter = 0;
             // for each directive
-            foreach($this->directives as $directiveName)
+            foreach($this->directives as $directiveName => $container)
             {
-                // check the DOM for the requested directive
-                $directivesDOM = $dom->getElementsByTagName($directiveName);
-                $directiveClass  = ucfirst($directiveName).'Directive';
+                $pattern = $container ? ('/<'.$directiveName.'[^>]*>(.*?)<\\/'.$directiveName.'>/si') : ('/<'.$directiveName.'[^>]*>/si');  
+                preg_match_all($pattern, $view, $directivesList);
 
                 // check if there's at least one directive with the current name
-                if($directivesDOM->length){
-                    // expand and clean
-                    for($i = $directivesDOM->length - 1; $i >= 0; $i--)
+                if(count($directivesList[0])){
+                    for($i = count($directivesList[0]) - 1; $i >= 0; $i--)
                     {
-                        $directiveDOM = $directivesDOM->item($i); 
-                        $directive = new $directiveClass($dom, $directiveDOM, $data);
-                        $directive->expand();
-                        // $directivesDOM->item($i)->parentNode->removeChild($directivesDOM->item($i));
-                        $directivesDOM->item($i)->parentNode->removeChild($directiveDOM);
+                        $directive = new $directiveClass($view);
+                        $directive->setData($data);
+                        
+                        if($container) {
+                            $directive->setTag($directivesList[0][$i])
+                                ->setContent($directivesList[1][$i]);
+                        } else {
+                            $directive->setTag($directivesList[0][$i]);
+                        }
+
+                        $view = $directive->expand();
                     }
 
                     $counter++;
                 }
             }
-            if(!$counter) $search = false;
+            if(!$counter) $searching = false;
         }
-
-        $view = $dom->saveHTML();
     }
 
     /**
