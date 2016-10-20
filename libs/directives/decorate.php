@@ -6,10 +6,11 @@
  * @version		1.0.0
  */
 
-
 class DecorateDirective extends Directive {
     
-    protected $attributes = array('template');
+    protected $attributes = array(
+        'template' => true
+    );
 
     public function expand()
     {
@@ -21,32 +22,15 @@ class DecorateDirective extends Directive {
         require(VIEWS .'/'. $this->template .'.php');
         $html = ob_get_clean();
 
-        $dom = new DOMDocument("1.0", "utf-8");
-        $dom->resolveExternals = true;
-        $dom->substituteEntities = false;
-        $dom->loadHTML($html);
-        $nodes = $dom->getElementsByTagName('body')->item(0)->childNodes;
-        
-        foreach($nodes as $node) {
-            $snippet = $this->_dom->importNode($node, true);
-            $replaceTags = $snippet->getElementsByTagName('replace'); 
-            
-            if($replaceTags->length)
-            {
-                $replaceTag = $replaceTags->item(0);
+        preg_match('/<replace[^>]*>/si', $html, $replace);  
 
-                $nb = $this->_tag->childNodes->length;
-                for($pos=0; $pos < $nb; $pos++)
-                {   
-                    $child = $this->_tag->childNodes->item($pos);
-                    if($child) $snippet->insertBefore($child, $replaceTag);
-                }
-
-                // remove the replace tag
-                $replaceTag->parentNode->removeChild($replaceTag);
-            }
-
-            $this->_tag->parentNode->insertBefore($snippet, $this->_tag);   
+        if(count($replace))
+        {
+            $html = str_replace($replace[0], $this->getContent(), $html);
         }
+        
+        $this->replaceTag($html);
+
+        return $this->getView();
     }
 }
