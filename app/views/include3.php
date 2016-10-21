@@ -1,1 +1,1 @@
-<h3>This the third include box: <?= $hello ?></h3>
+<h3>This the third include box</h3>

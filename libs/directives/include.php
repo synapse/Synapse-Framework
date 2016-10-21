@@ -12,7 +12,7 @@ class IncludeDirective extends Directive {
         'template' => true
     );
 
-    public function expand()
+    public function render()
     {
         if(!file_exists(VIEWS .'/'. $this->template .'.php')) {
             return;
@@ -21,10 +21,7 @@ class IncludeDirective extends Directive {
         ob_start();
         require(VIEWS .'/'. $this->template .'.php');
         $html = ob_get_clean();
-
-        $this->replaceTag($html);
-
-        return $this->getView();
+        return $html;
     }
 
 }

@@ -156,7 +156,8 @@ class View extends Object {
                             $directive->setTag($directivesList[0][$i]);
                         }
 
-                        $view = $directive->expand();
+                        $directiveRender = $directive->render();
+                        $view = $directive->replaceTag($directiveRender);
                     }
 
                     $counter++;

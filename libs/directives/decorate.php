@@ -12,7 +12,7 @@ class DecorateDirective extends Directive {
         'template' => true
     );
 
-    public function expand()
+    public function render()
     {
         if(!file_exists(VIEWS .'/'. $this->template .'.php')) {
             return;
@@ -29,8 +29,6 @@ class DecorateDirective extends Directive {
             $html = str_replace($replace[0], $this->getContent(), $html);
         }
         
-        $this->replaceTag($html);
-
-        return $this->getView();
+        return $html;
     }
 }

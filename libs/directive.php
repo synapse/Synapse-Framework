@@ -61,10 +61,10 @@ class Directive extends Object {
         return $this;
     }
 
-    protected function replaceTag($content)
+    public function replaceTag($content)
     {
         $this->_view = str_replace($this->getTag(), $content, $this->_view);
-        return $this;
+        return $this->_view;
     }
 
     protected function getContent()
@@ -103,8 +103,9 @@ class Directive extends Object {
         return $this->container;
     }
 
-    public function expand()
+    public function render()
     {
-        return $this->_view;
+        return '';
     }
+
 }
