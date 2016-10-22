@@ -6,10 +6,11 @@ Class MainController extends Controller {
 	{
 		$model = $this->getModel('main');
 		$helloString = $model->sayHello();
+		$hello = 1;
 
 		$this->getView()
 			->setTemplate(array('main'))
-			->setData($helloString, 'hello')
+			->setData($hello, 'hello')
 			->render();
 	}
 }

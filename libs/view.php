@@ -14,7 +14,7 @@ class View extends Object {
     private $templates      = array();
     private $_data          = array();
     private $templatePath   = null;
-    private $directives     = array("include", "decorate", "messages");
+    private $directives     = array("include", "decorate", "messages", "if");
 
 	public function __construct($path = null)
 	{
@@ -138,7 +138,7 @@ class View extends Object {
                 $directive = new $directiveClass();
                 $container = $directive->isContainer();
 
-                $pattern = $container ? ('/<'.$directiveName.'[^>]*>(.*?)<\\/'.$directiveName.'>/si') : ('/<'.$directiveName.'[^>]*>/si');  
+                $pattern = $container ? ('/<'.$directiveName.' [^>]*>(.*?)<\\/'.$directiveName.'>/si') : ('/<'.$directiveName.'[^>]*>/si');  
                 preg_match_all($pattern, $view, $directivesList);
 
                 // check if there's at least one directive with the current name
