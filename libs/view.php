@@ -14,7 +14,7 @@ class View extends Object {
     private $templates      = array();
     private $_data          = array();
     private $templatePath   = null;
-    private $directives     = array("include", "decorate", "messages", "if");
+    private $directives     = array("include", "decorate", "messages", "if", "csrf");
 
 	public function __construct($path = null)
 	{

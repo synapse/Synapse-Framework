@@ -139,4 +139,17 @@ class Session {
             unset($this->$key);
         }
     }
+
+    public function getToken($forceNew = false)
+	{	
+        $token = str_replace('-', '', UUID::v4());
+        $this->set($token, 1, true);
+		return $token;
+	}
+
+    public function checkToken($token)
+    {
+        if($this->get($token)) return true;
+        return false;
+    }
 }
