@@ -28,7 +28,12 @@ class Directive extends Object {
 
     public function setTag($tag)
     {
+        if(!strlen($tag)) return $this;
+
         $this->_tag = $tag;
+
+        if(!count($this->attributes)) return $this;
+        
         $dom = new DOM($tag);
 
         if($dom)

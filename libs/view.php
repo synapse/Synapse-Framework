@@ -137,30 +137,40 @@ class View extends Object {
                 $directive = NULL;
                 $directive = new $directiveClass();
                 $container = $directive->isContainer();
+                
+                if($container){
+                    $dom = new DOM($view, true, true, DEFAULT_TARGET_CHARSET, false);
+                    $tag = $dom->find($directiveName, 0);
 
-                $pattern = $container ? ('/<'.$directiveName.' [^>]*>(.*?)<\\/'.$directiveName.'>/si') : ('/<'.$directiveName.'[^>]*>/si');  
-                preg_match_all($pattern, $view, $directivesList);
+                    $directive->reset()
+                        ->setView($view)
+                        ->setData($data);
+                    
+                    $directive->setTag($tag->outertext)
+                        ->setContent($tag->innertext);
+                    
+                    $directiveRender = $directive->render();
+                    $view = $directive->replaceTag($directiveRender);
+                    $dom->clear();
+                } else {
+                    $pattern = '/<'.$directiveName.'[^>]*>/si';  
+                    preg_match_all($pattern, $view, $directivesList);
 
-                // check if there's at least one directive with the current name
-                if(count($directivesList[0])){
-                    for($i = count($directivesList[0]) - 1; $i >= 0; $i--)
-                    {
-                        $directive->reset()
-                            ->setView($view)
-                            ->setData($data);
-                        
-                        if($container) {
-                            $directive->setTag($directivesList[0][$i])
-                                ->setContent($directivesList[1][$i]);
-                        } else {
-                            $directive->setTag($directivesList[0][$i]);
+                    // check if there's at least one directive with the current name
+                    if(count($directivesList[0])){
+                        for($i = count($directivesList[0]) - 1; $i >= 0; $i--)
+                        {
+                            $directive->reset()
+                                ->setView($view)
+                                ->setData($data)
+                                ->setTag($directivesList[0][$i]);
+
+                            $directiveRender = $directive->render();
+                            $view = $directive->replaceTag($directiveRender);
                         }
 
-                        $directiveRender = $directive->render();
-                        $view = $directive->replaceTag($directiveRender);
+                        $counter++;
                     }
-
-                    $counter++;
                 }
             }
             if(!$counter) $searching = false;
