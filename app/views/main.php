@@ -1,12 +1,10 @@
 <decorate template="html5">
 	<messages/>
 
-	<decorate template="test">
 	<h1>1. Hello decorator</h1>
 	<h1>2. Hello decorator</h1>
-	</decorate>
 
-	<if condition="$hello==1">
+	<if condition="$hello==21">
 		<h2>If block here</h2>
 	<elseif condition="1==3"/>
 		<h2>Elseif 1==3</h2>

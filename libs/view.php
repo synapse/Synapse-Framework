@@ -139,7 +139,7 @@ class View extends Object {
                 $container = $directive->isContainer();
                 
                 if($container){
-                    $dom = new DOM($view, true, true, DEFAULT_TARGET_CHARSET, false);
+                    $dom = new DOM($view);
                     $tag = $dom->find($directiveName, 0);
 
                     $directive->reset()

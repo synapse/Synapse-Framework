@@ -47,13 +47,45 @@ class IfDirective extends Directive {
 
         else
         {
-            
             //preg_match_all('/<elseif[^>]*\\/>(.*?)<\\/if>/si', $this->getTag(), $elseif);
-
-            if(count($else))
+            // there are else if statements
+            if(count($elseifs[0]))
             {
-                preg_match('/<else\\/>(.*?)<\\/if>/si', $this->getTag(), $elsesec);
-                return $elsesec[1];
+                // there are multiple else if statements
+                if(count($elseifs[0]) > 1)
+                {
+
+                }
+                // there is only one else if statements
+                else
+                {
+                    if(count($else))
+                    {
+                        preg_match_all('/<elseif [^>]*\\/>(.*?)<else\\/>/si', $this->getTag(), $elseifWithElse);
+                        
+
+                        foreach($elseifWithElse[0] as $ei)
+                        {
+                            $eiDOM = new DOM($ei);
+                            $eiCondition = $eiDOM->root->firstChild()->getAttribute('condition');
+                        }
+                    }
+
+                    else 
+                    {
+
+                    }
+                }
+            }
+
+            // there are no else if statements
+            else
+            {
+                if(count($else))
+                {
+                    preg_match('/<else\\/>(.*?)<\\/if>/si', $this->getTag(), $elsesec);
+                    return $elsesec[1];
+                }
             }
         }
 
