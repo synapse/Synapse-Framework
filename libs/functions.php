@@ -16,8 +16,8 @@ function __()
     return call_user_func_array(array($language, 'translate'), $args);
 }
 
-function _trigger($event, $params){ App::trigger($event, $params); }
-function _hook($event, $params){ App::trigger($event, $params); }
+function _trigger($event, $params){ return App::trigger($event, $params); }
+function _hook($event, $params){ return App::trigger($event, $params); }
 
 
 function _log($message){ Log::_($message); }

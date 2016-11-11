@@ -28,8 +28,7 @@ class Plugin {
                     return false;
                 }
 
-                call_user_func_array(array(get_called_class(), $method), $par);
-                return true;
+                return call_user_func_array(array(get_called_class(), $method), $par);
             }
         }
 
