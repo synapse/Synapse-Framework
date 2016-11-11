@@ -158,10 +158,13 @@ class App {
     */
     public static function trigger($event, $params = array())
     {
+        $results = array();
+
         foreach(glob(PLUGINS."/*.php") as $pluginFile){
             include($pluginFile);
             $pluginFile = File::getName($pluginFile);
-            $plugin     = ucfirst(File::stripExt($pluginFile)).'Plugin';
+            $pluginName = strtolower(File::stripExt($pluginFile));
+            $plugin     = ucfirst($pluginName).'Plugin';
 
             if(!class_exists($plugin)){
                 throw new Error( __('Plugin class not found!').' '.$plugin );
@@ -171,8 +174,10 @@ class App {
                 throw new Error( __('Plugin class method "dispatch()" not found in class "{2}"', $plugin), null );
             }
 
-            $plugin::dispatch($event, $params);
+            $results[$pluginName] = $plugin::dispatch($event, $params);
         }
+
+        return $results;
     }
 
     /**
