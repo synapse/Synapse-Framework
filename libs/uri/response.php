@@ -147,8 +147,6 @@ class Response {
 
     public function __construct($content = '', $status = 200, $headers = array())
     {
-
-
         $this->setContent($content);
         $this->setStatusCode($status);
         $this->setProtocolVersion('1.0');
@@ -197,7 +195,6 @@ class Response {
 	 * If $allow is set, sets the cachable state of the response.  Always returns current state.
 	 *
 	 * @param   boolean  $allow  True to allow browser caching.
-	 *
 	 * @return  Response
 	 */
 	public function allowCache($allow = null)
@@ -302,7 +299,6 @@ class Response {
 	 * If body content already defined, this will replace it.
 	 *
 	 * @param   string  $content  The content to set to the response body.
-	 *
 	 * @return  Response
 	 */
 	public function setBody($content)
@@ -404,6 +400,7 @@ class Response {
 			// HTTP 1.0
 			$this->setHeader('Pragma', 'no-cache');
 		}
+		
 		else
 		{
 			// Expires.
